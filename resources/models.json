@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "models": [
+    {
+      "id": "whisper-base.en-q5_1",
+      "name": "Whisper base.en (English, 5-bit)",
+      "kind": "speech",
+      "version": "ggerganov/whisper.cpp@main ggml-base.en-q5_1",
+      "fileName": "ggml-base.en-q5_1.bin",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q5_1.bin",
+      "sizeBytes": 59721011,
+      "sha256": "4baf70dd0d7c4247ba2b81fafd9c01005ac77c2f9ef064e00dcf195d0e2fdd2f",
+      "license": "MIT (OpenAI Whisper weights)",
+      "licenseUrl": "https://github.com/openai/whisper/blob/main/LICENSE",
+      "purpose": "Default speech-to-text. Fast on CPU, good accuracy for short English notes.",
+      "languages": [
+        "en"
+      ],
+      "minMemoryMB": 300,
+      "runtime": {
+        "engine": "whisper.cpp"
+      },
+      "default": true
+    },
+    {
+      "id": "whisper-tiny.en-q5_1",
+      "name": "Whisper tiny.en (English, 5-bit)",
+      "kind": "speech",
+      "version": "ggerganov/whisper.cpp@main ggml-tiny.en-q5_1",
+      "fileName": "ggml-tiny.en-q5_1.bin",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin",
+      "sizeBytes": 32166155,
+      "sha256": "c77c5766f1cef09b6b7d47f21b546cbddd4157886b3b5d6d4f709e91e66c7c2b",
+      "license": "MIT (OpenAI Whisper weights)",
+      "licenseUrl": "https://github.com/openai/whisper/blob/main/LICENSE",
+      "purpose": "Fastest English speech-to-text for slow machines; noticeably less accurate.",
+      "languages": [
+        "en"
+      ],
+      "minMemoryMB": 150,
+      "runtime": {
+        "engine": "whisper.cpp"
+      }
+    },
+    {
+      "id": "whisper-small.en-q5_1",
+      "name": "Whisper small.en (English, 5-bit)",
+      "kind": "speech",
+      "version": "ggerganov/whisper.cpp@main ggml-small.en-q5_1",
+      "fileName": "ggml-small.en-q5_1.bin",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en-q5_1.bin",
+      "sizeBytes": 190098681,
+      "sha256": "bfdff4894dcb76bbf647d56263ea2a96645423f1669176f4844a1bf8e478ad30",
+      "license": "MIT (OpenAI Whisper weights)",
+      "licenseUrl": "https://github.com/openai/whisper/blob/main/LICENSE",
+      "purpose": "More accurate English speech-to-text; roughly 3x slower than base.en.",
+      "languages": [
+        "en"
+      ],
+      "minMemoryMB": 600,
+      "runtime": {
+        "engine": "whisper.cpp"
+      }
+    },
+    {
+      "id": "whisper-small-q5_1",
+      "name": "Whisper small (multilingual, 5-bit)",
+      "kind": "speech",
+      "version": "ggerganov/whisper.cpp@main ggml-small-q5_1",
+      "fileName": "ggml-small-q5_1.bin",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin",
+      "sizeBytes": 190085487,
+      "sha256": "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb",
+      "license": "MIT (OpenAI Whisper weights)",
+      "licenseUrl": "https://github.com/openai/whisper/blob/main/LICENSE",
+      "purpose": "Optional multilingual speech-to-text for Hindi / Hinglish. Experimental; slower than base.en.",
+      "languages": [
+        "en",
+        "hi",
+        "auto"
+      ],
+      "minMemoryMB": 600,
+      "runtime": {
+        "engine": "whisper.cpp"
+      }
+    },
+    {
+      "id": "qwen2.5-1.5b-instruct-q4_k_m",
+      "name": "Qwen2.5 1.5B Instruct (Q4_K_M)",
+      "kind": "llm",
+      "version": "Qwen/Qwen2.5-1.5B-Instruct-GGUF qwen2.5-1.5b-instruct-q4_k_m",
+      "fileName": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "sizeBytes": 1117320736,
+      "sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/blob/main/LICENSE",
+      "purpose": "Default classifier: turns a transcript into a structured task/reminder/idea/reference record.",
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "minMemoryMB": 2000,
+      "runtime": {
+        "engine": "llama.cpp",
+        "contextSize": 2048
+      },
+      "default": true
+    },
+    {
+      "id": "qwen2.5-0.5b-instruct-q4_k_m",
+      "name": "Qwen2.5 0.5B Instruct (Q4_K_M)",
+      "kind": "llm",
+      "version": "Qwen/Qwen2.5-0.5B-Instruct-GGUF qwen2.5-0.5b-instruct-q4_k_m",
+      "fileName": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "sizeBytes": 491400032,
+      "sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/blob/main/LICENSE",
+      "purpose": "Low-memory classifier for machines with little free RAM. Less accurate.",
+      "languages": [
+        "en"
+      ],
+      "minMemoryMB": 800,
+      "runtime": {
+        "engine": "llama.cpp",
+        "contextSize": 2048
+      }
+    }
+  ]
+}
