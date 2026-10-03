@@ -1,0 +1,9 @@
+node_modules/
+out/
+dist/
+resources/bin/
+*.log
+.vite/
+test-results/
+playwright-report/
+tests/fixtures/generated/

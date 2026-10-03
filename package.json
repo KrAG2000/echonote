@@ -1,0 +1,52 @@
+{
+  "name": "echonote",
+  "productName": "EchoNote",
+  "version": "1.0.0",
+  "description": "Local-first voice-to-action desktop assistant: speak a thought, get an organized task, reminder, idea or reference note. Runs whisper.cpp and llama.cpp locally.",
+  "main": "out/main/index.js",
+  "author": "EchoNote contributors",
+  "license": "MIT",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.test.json",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"tests/**/*.ts\" \"scripts/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"tests/**/*.ts\" \"scripts/**/*.ts\"",
+    "lint": "npm run typecheck && npm run format:check",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "native:build": "bash scripts/build-native-runtime.sh",
+    "package:linux": "npm run build && electron-builder --linux AppImage",
+    "models:prepare": "esbuild scripts/prepare-models.ts --bundle --platform=node --format=cjs --log-level=warning --outfile=out/scripts/prepare-models.js && node out/scripts/prepare-models.js",
+    "test:e2e": "electron-vite build && vitest run --config vitest.e2e.config.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "playwright-core": "^1.63.0",
+    "prettier": "^3.9.9",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.6",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "chrono-node": "^2.10.2",
+    "zod": "^4.6.5"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true,
+    "electron-winstaller": false
+  },
+  "desktopName": "echonote.desktop"
+}

@@ -1,0 +1,45 @@
+appId: dev.echonote.app
+productName: EchoNote
+executableName: echonote
+copyright: Copyright © 2026 EchoNote contributors
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+# Immutable runtime assets: native inference servers, model manifest, icons.
+# Models themselves are downloaded and verified on first run into the user's data directory.
+extraResources:
+  - from: resources/bin/linux-x64
+    to: bin/linux-x64
+    filter: ['**/*']
+  - from: resources/models.json
+    to: models.json
+  - from: resources/icon.png
+    to: icon.png
+  - from: resources/tray.png
+    to: tray.png
+  - from: resources/tray-recording.png
+    to: tray-recording.png
+asar: true
+# Reuse the Electron build already in node_modules (no second download).
+electronDist: node_modules/electron/dist
+electronLanguages: [en-US]
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+  category: Utility
+  syncDesktopName: true
+  icon: resources/icon.png
+  synopsis: Local-first voice notes, tasks and reminders
+  description: Press a shortcut, speak, and EchoNote turns your thought into a task, reminder, idea or reference note using local whisper.cpp and llama.cpp. Nothing leaves your computer.
+  desktop:
+    entry:
+      StartupWMClass: EchoNote
+      Keywords: voice;notes;reminders;tasks;
+appImage:
+  artifactName: EchoNote-${version}-${arch}.AppImage
+publish: null
