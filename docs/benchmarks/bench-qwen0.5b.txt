@@ -1,0 +1,10 @@
+[bench] llama qwen2.5-0.5b-instruct-q4_k_m cold start: 1161 ms
+[bench] llm 12758 ms  expected=reference got=reference  title="Staging server port" date="null" due=null confirm=false
+[bench] llm 2779 ms  expected=reminder got=reminder  title="Call the dentist" date="tomorrow at 7 pm" due=2026-10-05T13:30:00.000Z confirm=false
+[bench] llm 2824 ms  expected=task got=task  title="Fix the login bug on the settings page" date="null" due=null confirm=false
+[bench] llm 2639 ms  expected=idea got=idea  title="Plain-English query plan explainer" date="null" due=null confirm=false
+[bench] llm 2962 ms  expected=reference got=task  title="Find passport number in folder" date="null" due=null confirm=false
+[bench] llm 2483 ms  expected=task got=task  title="Buy milk and eggs" date="null" due=null confirm=false
+[bench] llm 2301 ms  expected=idea got=idea  title="Weekly summary app" date="null" due=null confirm=false
+[bench] llm 2776 ms  expected=reminder got=task  title="Pay electricity bill" date="15th" due=2026-10-15T03:30:00.000Z confirm=true
+[bench] llm warm latency: median 2779 ms, max 12758 ms, accuracy 6/8
