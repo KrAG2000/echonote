@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Local-first voice-to-action desktop assistant: speak a thought, get an organized task, reminder, idea or reference note. Runs whisper.cpp and llama.cpp locally.",
   "main": "out/main/index.js",
-  "author": "EchoNote contributors",
+  "author": "Kartik Agnihotri & the Claude AI",
   "license": "MIT",
   "private": true,
   "type": "commonjs",
