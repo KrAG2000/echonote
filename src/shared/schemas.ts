@@ -24,31 +24,26 @@ export const llmClassificationSchema = z.object({
 })
 export type LlmClassification = z.infer<typeof llmClassificationSchema>
 
-/** JSON schema handed to llama-server; it compiles this into a grammar that constrains decoding. */
-export const LLM_JSON_SCHEMA = {
-  type: 'object',
-  properties: {
-    category: { type: 'string', enum: [...CATEGORIES] },
-    title: { type: 'string', minLength: 1, maxLength: LIMITS.maxTitleChars },
-    summary: { type: 'string', maxLength: LIMITS.maxSummaryChars },
-    action: { type: ['string', 'null'], maxLength: LIMITS.maxActionChars },
-    date_expression: { type: ['string', 'null'], maxLength: LIMITS.maxDateExpressionChars },
-    needs_confirmation: { type: 'boolean' },
-    reason: { type: ['string', 'null'], maxLength: LIMITS.maxReasonChars },
-    confidence: { type: 'number', minimum: 0, maximum: 1 }
-  },
-  required: [
-    'category',
-    'title',
-    'summary',
-    'action',
-    'date_expression',
-    'needs_confirmation',
-    'reason',
-    'confidence'
-  ],
-  additionalProperties: false
-} as const
+/**
+ * GBNF grammar handed to llama-server; it constrains decoding to exactly this JSON shape. It is
+ * deliberately compact (fixed key order, no whitespace): on CPU every generated token costs
+ * ~0.1 s, and pretty-printed JSON nearly doubled the token count for Gemma 4.
+ */
+const str = (min: number, max: number): string => `"\\"" char{${min},${max}} "\\""`
+export const LLM_GRAMMAR = [
+  'root ::= "{\\"category\\":" cat ",\\"title\\":" title ",\\"summary\\":" summary ' +
+    '",\\"action\\":" action ",\\"date_expression\\":" dexpr ",\\"needs_confirmation\\":" bool ' +
+    '",\\"reason\\":" reason ",\\"confidence\\":" conf "}"',
+  `cat ::= ${CATEGORIES.map((c) => `"\\"${c}\\""`).join(' | ')}`,
+  `title ::= ${str(1, LIMITS.maxTitleChars)}`,
+  `summary ::= ${str(0, LIMITS.maxSummaryChars)}`,
+  `action ::= "null" | ${str(1, LIMITS.maxActionChars)}`,
+  `dexpr ::= "null" | ${str(1, LIMITS.maxDateExpressionChars)}`,
+  `reason ::= "null" | ${str(1, LIMITS.maxReasonChars)}`,
+  'bool ::= "true" | "false"',
+  'conf ::= "0" ("." [0-9] [0-9]?)? | "1" (".0")?',
+  'char ::= [^"\\\\\\x7F\\x00-\\x1F] | "\\\\" (["\\\\/bfnrt] | "u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F])'
+].join('\n')
 
 // ---------------------------------------------------------------------------
 // Settings

@@ -19,8 +19,8 @@ EchoNote is an Electron app with three processes of its own plus two local infer
 ┌───────────────┴──────────────┐   ┌────────────┴────────────┐  ┌──────────────────┐
 │ Renderer: main window        │   │ whisper-server          │  │ llama-server     │
 │  React UI + mic recorder     │   │ (whisper.cpp v1.9.4)    │  │ (llama.cpp b11379)│
-│  (getUserMedia → AudioWorklet│   │ base.en q5_1, warm      │  │ Qwen2.5-1.5B Q4,  │
-│   → 16 kHz PCM WAV)          │   └─────────────────────────┘  │ warm, JSON grammar│
+│  (getUserMedia → AudioWorklet│   │ base.en q5_1, warm      │  │ Gemma 4 E2B Q4_0, │
+│   → 16 kHz PCM WAV)          │   └─────────────────────────┘  │ warm, GBNF grammar│
 │ Renderer: capture overlay    │                                └──────────────────┘
 └──────────────────────────────┘
 ```
@@ -33,7 +33,7 @@ EchoNote is an Electron app with three processes of its own plus two local infer
 | Recorder (renderer) | mic → Float32 frames → WAV | `recording` | 5 min max length | mic errors mapped to `MIC_PERMISSION_DENIED`, `NO_INPUT_DEVICE`, `DEVICE_BUSY` |
 | Finalize | WAV bytes via IPC (≤12 MB) → header + silence check → atomic file write | capture `processing` | 15 s watchdog | `EMPTY_RECORDING` (nothing saved), `DISK_FULL` |
 | Transcription | WAV → whisper-server → text | capture `inbox` (transcript persisted) | 120 s | `failed`, audio kept for retry; one automatic retry after a worker crash |
-| Classification | transcript → llama-server (JSON-schema grammar) → JSON | `ready` / `needs_confirmation` | 45 s | stays in `inbox` with error code; LLM unavailable doesn't consume attempts |
+| Classification | transcript → llama-server (GBNF grammar) → JSON | `ready` / `needs_confirmation` | 90 s | stays in `inbox` with error code; LLM unavailable doesn't consume attempts |
 | Validation | JSON → zod → date resolution → business rules | — | — | invalid output retried once at higher temperature, then left in inbox |
 | Reminder | `ready` reminder with due time → `reminders` row | `pending` | — | notification failure recorded, reminder still visible in app |
 
@@ -60,8 +60,10 @@ The model never computes dates. It returns:
   "date_expression": "tomorrow at 7 pm", "needs_confirmation": false, "reason": null, "confidence": 0.95 }
 ```
 
-`llama-server` compiles the JSON schema (`src/shared/schemas.ts`) into a grammar, so output is
-structurally valid by construction. It is still treated as untrusted:
+A GBNF grammar (`LLM_GRAMMAR` in `src/shared/schemas.ts`) constrains decoding to this exact shape —
+compact, fixed key order, no whitespace (pretty-printed JSON nearly doubled Gemma 4's token count) —
+so output is structurally valid by construction. Thinking is disabled per request
+(`chat_template_kwargs.enable_thinking = false`). It is still treated as untrusted:
 
 1. `zod` validation (unknown categories, wrong types → rejected; long strings → clipped).
 2. `date_expression` must literally occur in the transcript, otherwise it is discarded (for reminders
@@ -134,5 +136,5 @@ Unconfirmed reminders are **not** scheduled until the user confirms (or edits) t
 
 `electron-builder` produces an AppImage. Native runtimes are built by
 `scripts/build-native-runtime.sh` (pinned tags, static ggml, AVX2 baseline, `$ORIGIN` rpath) and
-copied into `resources/bin/linux-x64`. Models are not bundled (1.1 GB); the first-run setup downloads
+copied into `resources/bin/linux-x64`. Models are not bundled (2.7 GB); the first-run setup downloads
 and verifies them.

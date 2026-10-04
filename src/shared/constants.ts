@@ -17,7 +17,7 @@ export const LIMITS = {
   maxReasonChars: 200,
   maxLlmOutputTokens: 300,
   transcriptionTimeoutMs: 120_000,
-  classificationTimeoutMs: 45_000,
+  classificationTimeoutMs: 90_000,
   maxClassifyAttempts: 3,
   maxQueueLength: 500,
   maxSearchChars: 200
@@ -27,7 +27,7 @@ export const DEFAULT_SETTINGS: Settings = {
   shortcut: 'Alt+Shift+Space',
   speechModelId: 'whisper-base.en-q5_1',
   speechLanguage: 'en',
-  llmModelId: 'qwen2.5-1.5b-instruct-q4_k_m',
+  llmModelId: 'gemma-4-e2b-it-q4_0',
   keepAudio: false,
   defaultReminderHour: 9,
   llmIdleUnloadMinutes: 0,

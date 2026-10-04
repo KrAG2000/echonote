@@ -184,7 +184,19 @@ describe('E2E', () => {
     // "in two minutes" -> due about two minutes after the capture.
     expect(due - created).toBeGreaterThan(90_000)
     expect(due - created).toBeLessThan(180_000)
-    expect(c.data.status).toBe('ready')
+    // With a garbled synthetic voice the model may (correctly) ask for confirmation; confirm it the
+    // way a user would, which is also what schedules an unconfirmed reminder.
+    expect(['ready', 'needs_confirmation']).toContain(c.data.status)
+    if (c.data.status === 'needs_confirmation') {
+      const confirmed = (await s.page.evaluate(
+        (cid) => window.echo.updateCapture({ id: cid!, confirm: true }),
+        id
+      )) as {
+        ok: boolean
+        data: { status: string }
+      }
+      expect(confirmed.ok && confirmed.data.status).toBe('ready')
+    }
 
     // Wait for delivery, then make sure it is not delivered again.
     const waitMs = due - Date.now() + 5_000

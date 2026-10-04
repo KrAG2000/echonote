@@ -59,24 +59,24 @@ front that this download is the only time EchoNote uses the network:
 {% github KrAG2000/echonote %}
 
 - **Repository (MIT):** https://github.com/KrAG2000/echonote
-- **Download (Linux AppImage):** https://github.com/KrAG2000/echonote/releases/tag/v1.0.0
+- **Download (Linux AppImage):** https://github.com/KrAG2000/echonote/releases/tag/v1.0.1
 
 ```bash
-chmod +x EchoNote-1.0.0-x86_64.AppImage
-./EchoNote-1.0.0-x86_64.AppImage
+chmod +x EchoNote-1.0.1-x86_64.AppImage
+./EchoNote-1.0.1-x86_64.AppImage
 ```
 
-Tested on Fedora 44 / GNOME 50 (Wayland). Needs an x86-64 CPU with AVX2 and about 2.5 GB of free RAM.
+Tested on Fedora 44 / GNOME 50 (Wayland). Needs an x86-64 CPU with AVX2 and about 4.5 GB of free RAM (smaller models are available in Settings).
 
 ## How I Built It
 
 * **Electron + React + TypeScript**, SQLite via Node's built-in `node:sqlite` (no native modules).
 * **whisper.cpp** (`whisper-server`, base.en 5-bit) for speech-to-text, kept warm in a child process.
-* **llama.cpp** (`llama-server`) running **Qwen2.5-1.5B-Instruct (Q4_K_M, Apache-2.0)**, also kept warm. The
-  output is constrained by a JSON-schema grammar, then validated again with zod — model output is treated
-  as untrusted input.
+* **llama.cpp** (`llama-server`) running **Google's Gemma 4 E2B Instruct (Q4_0, Apache-2.0)**, also kept warm.
+  Gemma is the brain of the app: every note goes through it. Its output is constrained by a grammar, then
+  validated again with zod — model output is treated as untrusted input.
 * Both runtimes are compiled from pinned releases and shipped inside the AppImage — no Python, Ollama or
-  compiler needed. The first-run screen downloads the two model files once (1.1 GB) and checks their
+  compiler needed. The first-run screen downloads the two model files once (2.7 GB) and checks their
   SHA-256; after that EchoNote never touches the network.
 
 Three decisions I'm happy with:
@@ -112,8 +112,8 @@ Testing found real bugs, which I fixed:
 ### Honest numbers
 
 On my laptop (i7-13620H, CPU only, power-saver profile): transcript visible ≈2.3 s after I stop talking;
-organized ≈7–8 s after. The LLM is the slow part: ~5.4 s per note with the 1.5B model (8/8 test sentences
-correct), ~2.8 s with the 0.5B one (6/8). My goal was organizing in under 2 seconds and I didn't reach it on
+organized ≈11–13 s after. The LLM is the slow part: ~8.6 s per note with Gemma 4 E2B (8/8 test sentences
+correct). Qwen2.5 1.5B is available as a faster option (~5.5 s, also 8/8). My goal was organizing in under 2 seconds and I didn't reach it on
 this hardware — but because the transcript is saved first, nothing you said waits on the model.
 
 ## Why Does Open Innovation Matter?
@@ -125,11 +125,11 @@ this hardware — but because the transcript is saved first, nothing you said wa
 * **It costs nothing to run.** No API key, no per-request bill, no account. I can give the AppImage to a
   friend and that's the whole setup.
 * **I could pick and swap the parts by measuring them.** I benchmarked three Whisper sizes (tiny 0.9 s,
-  base 1.8 s, small 6.5 s per clip) and two Qwen sizes on the actual laptop and chose by speed and
-  accuracy. Users with less RAM can switch to the 0.5B model in Settings, and a multilingual Whisper model
+  base 1.8 s, small 6.5 s per clip) and four LLMs on the actual laptop (Gemma 4 E2B, Gemma 3 1B, Qwen2.5
+  1.5B and 0.5B) and chose by speed and accuracy. Users with less RAM can switch to a smaller model in Settings, and a multilingual Whisper model
   for Hindi/Hinglish is one dropdown away (not yet tested with real speech).
 * **Precise about licenses:** whisper.cpp and llama.cpp are MIT; the Whisper weights are MIT;
-  Qwen2.5-1.5B-Instruct is Apache-2.0. These are open-*weight* models — their training data isn't public.
+  Gemma 4 E2B and Qwen2.5 are Apache-2.0 (Gemma 3 1B uses Google's Gemma Terms of Use). These are open-*weight* models — their training data isn't public.
 
 Where open was harder: CPU-only inference on a power-saving laptop is slower than a hosted API, Wayland had
 no ready-made global shortcut, and I had to package the native inference binaries myself.
@@ -140,7 +140,15 @@ no ready-made global shortcut, and I had to package the native inference binarie
 
 ## Prize Categories
 
-None — EchoNote doesn't use any partner technology, so I'm entering for the overall prize only.
+**Best Use of Gemma.** Google's open-weight **Gemma 4 E2B** is EchoNote's default brain: every note you
+speak is turned into a task, reminder, idea or reference note by Gemma, running locally through llama.cpp.
+No Gemma API, no cloud — the Apache-2.0 weights are downloaded once and run on the laptop's CPU.
+
+Why Gemma 4 E2B: I benchmarked it against Gemma 3 1B and Qwen2.5 (1.5B and 0.5B) on the same test
+sentences. Gemma 4 E2B classified all 8 correctly (Gemma 3 1B: 6/8), and its Apache-2.0 license fits an
+open-source app. Two things made it practical on a CPU: switching off its "thinking" mode for this
+structured task (otherwise it spent the whole token budget reasoning), and a compact output grammar
+(no whitespace in the JSON), which cut its time per note from ~14 s to ~8.6 s.
 
 ## What's Next
 

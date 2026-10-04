@@ -1,7 +1,7 @@
 import { ManagedServer } from './managed-server'
 import type { Logger } from '../logger'
 import { LIMITS } from '../../shared/constants'
-import { LLM_JSON_SCHEMA } from '../../shared/schemas'
+import { LLM_GRAMMAR } from '../../shared/schemas'
 import { threadCount } from './transcription-engine'
 
 export interface ClassifierOutput {
@@ -168,10 +168,10 @@ export class LlamaEngine implements Classifier {
           temperature: opts.temperature ?? 0,
           max_tokens: LIMITS.maxLlmOutputTokens,
           cache_prompt: true,
-          response_format: {
-            type: 'json_schema',
-            json_schema: { name: 'capture', strict: true, schema: LLM_JSON_SCHEMA }
-          }
+          grammar: LLM_GRAMMAR,
+          // Gemma 4 (and other "thinking" models) would otherwise spend the whole token budget
+          // reasoning before answering; classification doesn't need it. Ignored by other templates.
+          chat_template_kwargs: { enable_thinking: false }
         }),
         signal: AbortSignal.timeout(LIMITS.classificationTimeoutMs)
       })

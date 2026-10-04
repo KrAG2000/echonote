@@ -20,3 +20,19 @@ GNOME shortcut command → app receives toggle (named pipe): 27, 21, 17 ms. Cold
 Memory (RSS, AppImage): after startup llama-server 1907 MB, whisper-server 105 MB, Electron (9 processes,
 shared pages counted repeatedly) 737 MB; after 5 captures 1908 / 164 / 957 MB. With `-c 2048 -ub 256`
 llama-server measured 1817 MB standalone.
+
+## Gemma 4 E2B (default since v1.0.1)
+
+In-app end-to-end timings with Gemma 4 E2B (warm, compact grammar, thinking disabled):
+
+| capture | transcription | LLM | stop → organized |
+| --- | --- | --- | --- |
+| reference | 2319 ms | 9081 ms | 11588 ms |
+| reminder | 2396 ms | 10183 ms | 12849 ms |
+| reminder | 2345 ms | 10309 ms | 12961 ms |
+| idea (offline netns) | 2236 ms | 8898 ms | 11329 ms |
+
+Classifier comparison on the 8-sentence set (`bench-*.txt`, warm median):
+Gemma 4 E2B 8.6 s, 8/8 · Qwen2.5 1.5B 5.5 s, 8/8 · Gemma 3 1B 4.2 s, 6/8 · Qwen2.5 0.5B 2.8 s, 6/8.
+Before the compact grammar, Gemma 4 E2B took ~14 s (pretty-printed JSON, ~95 tokens); with thinking left
+on it exceeded 40 s. llama-server RSS with Gemma 4 E2B: ~4.0 GB.

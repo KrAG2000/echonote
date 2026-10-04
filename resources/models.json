@@ -85,6 +85,29 @@
       }
     },
     {
+      "id": "gemma-4-e2b-it-q4_0",
+      "name": "Gemma 4 E2B Instruct (Q4_0)",
+      "kind": "llm",
+      "version": "ggml-org/gemma-4-E2B-it-GGUF gemma-4-E2B-it-Q4_0",
+      "fileName": "gemma-4-E2B-it-Q4_0.gguf",
+      "url": "https://huggingface.co/ggml-org/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_0.gguf",
+      "sizeBytes": 2841481184,
+      "sha256": "8e30dff3ac4c8434c49a7036fa15564bdbb6044e42bf04550bf1a096ad7e6a52",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://huggingface.co/google/gemma-4-E2B-it",
+      "purpose": "Default classifier: Google's open-weight Gemma 4 (effective 2B) turns a transcript into a structured task/reminder/idea/reference record.",
+      "languages": [
+        "en",
+        "hi"
+      ],
+      "minMemoryMB": 3800,
+      "runtime": {
+        "engine": "llama.cpp",
+        "contextSize": 2048
+      },
+      "default": true
+    },
+    {
       "id": "qwen2.5-1.5b-instruct-q4_k_m",
       "name": "Qwen2.5 1.5B Instruct (Q4_K_M)",
       "kind": "llm",
@@ -95,7 +118,7 @@
       "sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
       "license": "Apache-2.0",
       "licenseUrl": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/blob/main/LICENSE",
-      "purpose": "Default classifier: turns a transcript into a structured task/reminder/idea/reference record.",
+      "purpose": "Faster classifier (about 1.6x faster than Gemma 4 E2B on CPU), equally accurate in our tests.",
       "languages": [
         "en",
         "hi"
@@ -104,8 +127,28 @@
       "runtime": {
         "engine": "llama.cpp",
         "contextSize": 2048
-      },
-      "default": true
+      }
+    },
+    {
+      "id": "gemma-3-1b-it-qat-q4_0",
+      "name": "Gemma 3 1B Instruct (QAT Q4_0)",
+      "kind": "llm",
+      "version": "ggml-org/gemma-3-1b-it-qat-GGUF gemma-3-1b-it-qat-Q4_0",
+      "fileName": "gemma-3-1b-it-qat-Q4_0.gguf",
+      "url": "https://huggingface.co/ggml-org/gemma-3-1b-it-qat-GGUF/resolve/main/gemma-3-1b-it-qat-Q4_0.gguf",
+      "sizeBytes": 720425600,
+      "sha256": "ef60e4e91a738c99ae9976b050657dfe68a4007a0ccca121b55ec0c413dccd58",
+      "license": "Gemma Terms of Use",
+      "licenseUrl": "https://ai.google.dev/gemma/terms",
+      "purpose": "Small Gemma classifier for low-memory machines. Less accurate (6/8 in our tests).",
+      "languages": [
+        "en"
+      ],
+      "minMemoryMB": 1200,
+      "runtime": {
+        "engine": "llama.cpp",
+        "contextSize": 2048
+      }
     },
     {
       "id": "qwen2.5-0.5b-instruct-q4_k_m",
@@ -118,7 +161,7 @@
       "sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
       "license": "Apache-2.0",
       "licenseUrl": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/blob/main/LICENSE",
-      "purpose": "Low-memory classifier for machines with little free RAM. Less accurate.",
+      "purpose": "Smallest, fastest classifier for very low-memory machines. Less accurate (6/8 in our tests).",
       "languages": [
         "en"
       ],

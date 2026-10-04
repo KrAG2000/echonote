@@ -1,0 +1,16 @@
+[bench] whisper whisper-base.en-q5_1 cold start: 390 ms
+[bench] whisper jfk.wav (11.0 s audio): 2085 ms
+[bench] whisper task.wav: 1862 ms -> "I need to fix the login bug on the settings page."
+[bench] whisper reference.wav: 1847 ms -> "The staging server uses Part 8 081"
+[bench] whisper reminder.wav: 1949 ms -> "Remind me tomorrow at night in the morning to call the dentist."
+[bench] llama gemma-4-e2b-it-q4_0 cold start: 4476 ms
+[bench] llm 35009 ms  expected=reference got=reference  title="Staging server port" date="null" due=null confirm=false
+[bench] llm 8821 ms  expected=reminder got=reminder  title="Call the dentist tomorrow" date="tomorrow at 7 pm" due=2026-10-06T13:30:00.000Z confirm=false
+[bench] llm 8648 ms  expected=task got=task  title="Fix login bug" date="null" due=null confirm=false
+[bench] llm 7992 ms  expected=idea got=idea  title="Build query plan tool" date="null" due=null confirm=false
+[bench] llm 8008 ms  expected=reference got=reference  title="Passport number location" date="null" due=null confirm=false
+[bench] llm 8380 ms  expected=task got=task  title="Buy milk and eggs" date="null" due=null confirm=false
+[bench] llm 7595 ms  expected=idea got=idea  title="Weekly app summary feature" date="null" due=null confirm=false
+[bench] llm 9201 ms  expected=reminder got=reminder  title="Pay electricity bill" date="the 15th" due=2026-10-15T03:30:00.000Z confirm=true
+[bench] llm warm latency: median 8648 ms, max 35009 ms, accuracy 8/8
+[bench] full pipeline (task.wav): 36583 ms

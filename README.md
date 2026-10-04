@@ -6,7 +6,7 @@ on your own computer.
 
 * 🎙 **Capture in one keystroke** from any app. A small overlay shows that the microphone is live.
 * 📝 **Local speech-to-text** with [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
-* 🧠 **Local organizing** with [llama.cpp](https://github.com/ggml-org/llama.cpp) and Qwen2.5-1.5B-Instruct:
+* 🧠 **Local organizing** with [llama.cpp](https://github.com/ggml-org/llama.cpp) and Google's open-weight **Gemma 4** (E2B):
   category, short title, summary, action, and the date phrase you said.
 * ⏰ **Reminders** with desktop notifications, scheduled from SQLite and restored after restarts.
 * 📥 **Nothing is ever lost**: the transcript is saved before the AI runs. If the model is loading,
@@ -23,22 +23,22 @@ Built for the [DEV Hacktoberfest Weekend Challenge 2026](https://dev.to/challeng
 
 ## Install (Linux x86-64)
 
-1. Download `EchoNote-1.0.0-x86_64.AppImage` and make it executable:
+1. Download `EchoNote-1.0.1-x86_64.AppImage` and make it executable:
    ```bash
-   chmod +x EchoNote-1.0.0-x86_64.AppImage
-   ./EchoNote-1.0.0-x86_64.AppImage
+   chmod +x EchoNote-1.0.1-x86_64.AppImage
+   ./EchoNote-1.0.1-x86_64.AppImage
    ```
    (Fedora ships FUSE for AppImages. On distributions without it, install `fuse`/`libfuse2`, or run
    with `--appimage-extract-and-run`.)
-2. The first-run screen downloads two model files (1.1 GB total) from Hugging Face and verifies their
+2. The first-run screen downloads two model files (2.7 GB total) from Hugging Face and verifies their
    SHA-256 checksums. **This is the only time EchoNote uses the network.**
 3. Click **Set up GNOME shortcut** (on GNOME/Wayland) — the default shortcut is <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd>.
 
 Nothing else is needed: no Node.js, Python, Ollama, compiler, database server or manual model files.
 The inference runtimes (`whisper-server`, `llama-server`) are inside the AppImage.
 
-**Requirements:** x86-64 CPU with AVX2 (Intel Haswell / AMD Zen or newer), ~2.5 GB free RAM for the
-default models (a 0.5B model is available for low-memory machines), ~1.2 GB disk for models.
+**Requirements:** x86-64 CPU with AVX2 (Intel Haswell / AMD Zen or newer), ~4.5 GB free RAM for the
+default models (smaller models are available in Settings for low-memory machines), ~3 GB disk for models.
 Tested on Fedora 44, GNOME 50 (Wayland). Other distributions/desktops are untested.
 
 ## Using it
@@ -57,13 +57,14 @@ Tested on Fedora 44, GNOME 50 (Wayland). Other distributions/desktops are untest
 ```text
 shortcut ─► recorder (renderer, 16 kHz WAV) ─► SQLite capture row ─► whisper-server ─► transcript saved
                                                                                          │
-                         reminder scheduler ◄─ validated record ◄─ zod + date resolver ◄─ llama-server (JSON grammar)
+                         reminder scheduler ◄─ validated record ◄─ zod + date resolver ◄─ llama-server + Gemma 4 (grammar)
 ```
 
 * The LLM never computes dates; it copies the date *phrase* ("tomorrow at 7 pm"). A deterministic
   resolver (chrono-node, local timezone) turns it into a time, and a phrase that does not occur in
   the transcript is discarded — so deadlines are never invented.
-* Model output is treated as untrusted input: JSON-schema-constrained decoding, then strict validation.
+* Model output is treated as untrusted input: grammar-constrained decoding (compact JSON, no whitespace), then strict validation.
+* "Thinking" is switched off for classification, so Gemma 4 answers directly.
 * Both inference servers are started once and stay warm; the shared prompt is cached at startup.
 
 Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/PRIVACY.md](docs/PRIVACY.md) ·
@@ -75,10 +76,11 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/PRIVACY.md](docs/
 | --- | --- | --- | --- |
 | Speech (default) | Whisper base.en, 5-bit (ggml) | 57 MB | MIT (OpenAI Whisper weights) |
 | Speech (options) | Whisper tiny.en / small.en / small (multilingual, for Hindi/Hinglish – experimental, untested) | 31–181 MB | MIT |
-| Organizing (default) | Qwen2.5-1.5B-Instruct, Q4_K_M GGUF | 1.04 GB | Apache-2.0 |
-| Organizing (low memory) | Qwen2.5-0.5B-Instruct, Q4_K_M GGUF | 469 MB | Apache-2.0 |
+| Organizing (default) | **Gemma 4 E2B Instruct**, Q4_0 GGUF (ggml-org) | 2.65 GB | Apache-2.0 |
+| Organizing (faster) | Qwen2.5-1.5B-Instruct, Q4_K_M GGUF | 1.04 GB | Apache-2.0 |
+| Organizing (low memory) | Gemma 3 1B Instruct QAT Q4_0 / Qwen2.5-0.5B-Instruct Q4_K_M | 687 / 469 MB | Gemma Terms of Use / Apache-2.0 |
 
-All are open-weight models; Qwen2.5 weights are Apache-2.0, the Whisper weights are MIT. The training
+All are open-weight models. Gemma 4 and Qwen2.5 weights are Apache-2.0, Gemma 3 uses Google's Gemma Terms of Use, and the Whisper weights are MIT. The training
 data of these models is not open, so they are "open-weight", not fully open-source AI.
 
 ## Measured performance
@@ -96,11 +98,12 @@ repo (`docs/benchmarks/`, `captures.timings`).
 | Stop → audio persisted | ~0.15 s |
 | whisper base.en load / transcription of a 3–11 s clip | 0.23–0.5 s / 1.8–2.3 s |
 | llama-server load / prompt-cache warm-up (once per launch) | 2.0–2.9 s / 15–17 s |
-| LLM classification, warm (1.5B) | median 5.4 s, range 4.4–6.0 s |
-| LLM classification, warm (0.5B) | median 2.8 s |
-| Stop → organized note in the app (1.5B) | 7.4–8.3 s (transcript visible after ~2.3 s) |
-| Classification accuracy, 8-sentence test set | 1.5B: 8/8 · 0.5B: 6/8 |
-| Memory (RSS) after startup / after 5 captures | llama-server 1.9 / 1.9 GB · whisper-server 105 / 164 MB · Electron (all processes, shared pages counted repeatedly) 0.74 / 0.96 GB |
+| LLM classification, warm — **Gemma 4 E2B (default)** | median 8.6 s, 8/8 correct |
+| LLM classification, warm — Qwen2.5 1.5B | median 5.5 s, 8/8 correct |
+| LLM classification, warm — Gemma 3 1B / Qwen2.5 0.5B | 4.2 s / 2.8 s, 6/8 correct each |
+| Gemma 4 load / prompt-cache warm-up (once per launch) | 4.5–13 s / ~35 s |
+| Stop → organized note in the app | 11.3–13.0 s with Gemma 4, 7.4–8.3 s with Qwen 1.5B (transcript visible after ~2.3 s) |
+| Memory (RSS) | llama-server with Gemma 4 E2B ~4.0 GB (Qwen 1.5B: 1.8–1.9 GB) · after startup / after 5 captures (Qwen run): llama-server 1.9 / 1.9 GB · whisper-server 105 / 164 MB · Electron (all processes, shared pages counted repeatedly) 0.74 / 0.96 GB |
 
 Speech model comparison (same machine, synthetic espeak voice, which is harder than a human voice):
 
@@ -111,9 +114,9 @@ Speech model comparison (same machine, synthetic espeak voice, which is harder t
 | small.en q5_1 | 0.42 s | 6.5 s | 353 MB | most accurate, ~3.5× slower |
 
 **Targets not met on this machine:** the spec's "warm LLM P95 < 2 s" — warm classification takes
-~5 s with the 1.5B model on this throttled CPU (generation runs at ~12 tokens/s). The transcript is
-saved and visible ~2 s after you stop, so nothing waits on the LLM, but organizing is not instant.
-The 0.5B model is ~2× faster at lower accuracy. GPU offload is not implemented (the build machine has
+~8.6 s with Gemma 4 E2B on this throttled CPU (generation runs at ~7 tokens/s; ~5.5 s with Qwen 1.5B).
+The transcript is saved and visible ~2 s after you stop, so nothing waits on the LLM, but organizing is
+not instant. Forcing compact JSON output cut Gemma's time from ~14 s to ~8.6 s. GPU offload is not implemented (the build machine has
 no CUDA/Vulkan SDK).
 
 ## Testing
@@ -146,7 +149,7 @@ npm ci
 npm run native:build        # builds whisper-server + llama-server into resources/bin/linux-x64
 npm run models:prepare      # optional: pre-download default models to ~/.config/EchoNote/models
 npm run dev                 # run in development
-npm run package:linux       # -> dist/EchoNote-1.0.0-x86_64.AppImage
+npm run package:linux       # -> dist/EchoNote-1.0.1-x86_64.AppImage
 ```
 
 ## Limitations
@@ -163,6 +166,7 @@ npm run package:linux       # -> dist/EchoNote-1.0.0-x86_64.AppImage
 * One primary intent per recording; a note containing several tasks becomes one item.
 * The tray icon needs the AppIndicator extension on GNOME.
 * Models are downloaded at first run (not bundled) to keep the AppImage at 135 MB.
+* Gemma 4 E2B needs ~4 GB of RAM; on machines with less free memory EchoNote offers the smaller models.
 
 ## License
 

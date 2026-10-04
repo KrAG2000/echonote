@@ -11,7 +11,7 @@ personal content).
   (visible in GNOME Settings → Keyboard → Custom Shortcuts) that runs `EchoNote --toggle`.
   If nothing happens, check that the key combination is not already used by GNOME.
 * **Other Wayland desktops**: bind a custom shortcut in your desktop settings to
-  `/path/to/EchoNote-1.0.0-x86_64.AppImage --toggle`.
+  `/path/to/EchoNote-1.0.1-x86_64.AppImage --toggle`.
 * **X11**: the shortcut is registered directly. If registration fails, another app owns the keys —
   choose a different combination in Settings.
 * You can always record with the big button, the overlay's Stop button or the tray menu.
@@ -26,15 +26,15 @@ personal content).
 
 ## AI model shows "low memory"
 
-The LLM needs about 1.6 GB of free RAM. EchoNote checks `MemAvailable` before loading it. Close some
-applications and press **Restart AI model**, press **Load anyway**, or switch to the 0.5B model in
+The default LLM (Gemma 4 E2B) needs about 3.8 GB of free RAM (Qwen 1.5B: ~2 GB, the small models ~1 GB). EchoNote checks `MemAvailable` before loading it. Close some
+applications and press **Restart AI model**, press **Load anyway**, or switch to a smaller model in
 Settings. Captures are still transcribed and wait in the Inbox in the meantime.
 
 ## Organizing is slow
 
-On CPU-only machines the 1.5B model takes several seconds per note; much slower when the CPU is in a
+On CPU-only machines Gemma 4 E2B takes several seconds per note (~8.6 s on the test laptop); much slower when the CPU is in a
 power-saving profile (GNOME "Power Saver" / platform profile `quiet`). Options: switch the power mode
-to Balanced/Performance, or select the 0.5B model. The transcript is saved immediately either way.
+to Balanced/Performance, or select Qwen2.5 1.5B in Settings (~1.6× faster, equally accurate in our tests). The transcript is saved immediately either way.
 
 ## Model download failed
 
