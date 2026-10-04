@@ -56,6 +56,8 @@ front that this download is the only time EchoNote uses the network:
 
 ## Code
 
+{% github KrAG2000/echonote %}
+
 - **Repository (MIT):** https://github.com/KrAG2000/echonote
 - **Download (Linux AppImage):** https://github.com/KrAG2000/echonote/releases/tag/v1.0.0
 
@@ -114,7 +116,7 @@ organized ≈7–8 s after. The LLM is the slow part: ~5.4 s per note with the 1
 correct), ~2.8 s with the 0.5B one (6/8). My goal was organizing in under 2 seconds and I didn't reach it on
 this hardware — but because the transcript is saved first, nothing you said waits on the model.
 
-## Why Open Matters Here
+## Why Does Open Innovation Matter?
 
 * **It's my private brain-dump.** Half-formed ideas, reminders, things I haven't told anyone yet. With
   open-weight models running locally, none of it goes to a server I don't control. A test runs the whole
@@ -131,6 +133,14 @@ this hardware — but because the transcript is saved first, nothing you said wa
 
 Where open was harder: CPU-only inference on a power-saving laptop is slower than a hosted API, Wayland had
 no ready-made global shortcut, and I had to package the native inference binaries myself.
+
+## My Agent Session
+
+*(Optional — add a DevRelay session embed here if you save one.)*
+
+## Prize Categories
+
+None — EchoNote doesn't use any partner technology, so I'm entering for the overall prize only.
 
 ## What's Next
 
