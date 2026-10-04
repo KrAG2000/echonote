@@ -11,7 +11,7 @@ personal content).
   (visible in GNOME Settings → Keyboard → Custom Shortcuts) that runs `EchoNote --toggle`.
   If nothing happens, check that the key combination is not already used by GNOME.
 * **Other Wayland desktops**: bind a custom shortcut in your desktop settings to
-  `/path/to/EchoNote-1.0.2-x86_64.AppImage --toggle` (RPM install: `echonote --toggle``.
+  `/path/to/EchoNote-1.0.2-x86_64.AppImage --toggle` (RPM install: `echonote --toggle`).
 * **X11**: the shortcut is registered directly. If registration fails, another app owns the keys —
   choose a different combination in Settings.
 * You can always record with the big button, the overlay's Stop button or the tray menu.
