@@ -31,15 +31,26 @@ linux:
   target:
     - target: AppImage
       arch: [x64]
+    - target: rpm
+      arch: [x64]
   category: Utility
   syncDesktopName: true
   icon: resources/icon.png
   synopsis: Local-first voice notes, tasks and reminders
-  description: Press a shortcut, speak, and EchoNote turns your thought into a task, reminder, idea or reference note using local whisper.cpp and llama.cpp. Nothing leaves your computer.
+  description: Press a shortcut, speak, and EchoNote turns your thought into a task, reminder, idea or reference note using whisper.cpp and Google Gemma 4 running locally. Nothing leaves your computer.
   desktop:
     entry:
       StartupWMClass: EchoNote
       Keywords: voice;notes;reminders;tasks;
+# Native Fedora package: installs to /opt/EchoNote with an app-menu entry, icons and AppStream
+# metadata, so GNOME Software lists it under Installed and can uninstall it.
+rpm:
+  artifactName: echonote-${version}.${arch}.rpm
+  packageName: echonote
+  vendor: Kartik Agnihotri
+  maintainer: Kartik Agnihotri <agni5kartik@gmail.com>
+  fpm:
+    - resources/linux/dev.echonote.app.metainfo.xml=/usr/share/metainfo/dev.echonote.app.metainfo.xml
 appImage:
   artifactName: EchoNote-${version}-${arch}.AppImage
 publish: null

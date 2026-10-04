@@ -59,11 +59,13 @@ front that this download is the only time EchoNote uses the network:
 {% github KrAG2000/echonote %}
 
 - **Repository (MIT):** https://github.com/KrAG2000/echonote
-- **Download (Linux AppImage):** https://github.com/KrAG2000/echonote/releases/tag/v1.0.1
+- **Download:** https://github.com/KrAG2000/echonote/releases/latest. There's an RPM for Fedora, which shows up
+  in GNOME Software and uninstalls from there, and a portable AppImage for other distributions.
 
 ```bash
-chmod +x EchoNote-1.0.1-x86_64.AppImage
-./EchoNote-1.0.1-x86_64.AppImage
+sudo dnf install ./echonote-1.0.2.x86_64.rpm      # Fedora
+# or
+chmod +x EchoNote-1.0.2-x86_64.AppImage && ./EchoNote-1.0.2-x86_64.AppImage
 ```
 
 Tested on Fedora 44 / GNOME 50 (Wayland). Needs an x86-64 CPU with AVX2 and about 4.5 GB of free RAM (smaller models are available in Settings).

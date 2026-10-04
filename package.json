@@ -1,7 +1,7 @@
 {
   "name": "echonote",
   "productName": "EchoNote",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Local-first voice-to-action desktop assistant: speak a thought, get an organized task, reminder, idea or reference note. Runs whisper.cpp and llama.cpp locally.",
   "main": "out/main/index.js",
   "author": "Kartik Agnihotri & the Claude AI",
@@ -19,7 +19,7 @@
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "native:build": "bash scripts/build-native-runtime.sh",
-    "package:linux": "npm run build && electron-builder --linux AppImage",
+    "package:linux": "npm run build && electron-builder --linux",
     "models:prepare": "esbuild scripts/prepare-models.ts --bundle --platform=node --format=cjs --log-level=warning --outfile=out/scripts/prepare-models.js && node out/scripts/prepare-models.js",
     "test:e2e": "electron-vite build && vitest run --config vitest.e2e.config.ts"
   },

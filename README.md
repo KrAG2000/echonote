@@ -23,23 +23,48 @@ Built for the [DEV Hacktoberfest Weekend Challenge 2026](https://dev.to/challeng
 
 ## Install (Linux x86-64)
 
-1. Download `EchoNote-1.0.1-x86_64.AppImage` and make it executable:
-   ```bash
-   chmod +x EchoNote-1.0.1-x86_64.AppImage
-   ./EchoNote-1.0.1-x86_64.AppImage
-   ```
-   (Fedora ships FUSE for AppImages. On distributions without it, install `fuse`/`libfuse2`, or run
-   with `--appimage-extract-and-run`.)
-2. The first-run screen downloads two model files (2.7 GB total) from Hugging Face and verifies their
+Download from the [latest release](https://github.com/KrAG2000/echonote/releases/latest).
+
+**Fedora / RHEL (recommended): RPM package.** It installs like any other app, shows up in the app menu
+and in GNOME Software under *Installed*, and can be uninstalled from there.
+
+```bash
+sudo dnf install ./echonote-1.0.2.x86_64.rpm
+```
+
+**Any other distribution: AppImage.** A single portable file; nothing is installed.
+
+```bash
+chmod +x EchoNote-1.0.2-x86_64.AppImage
+./EchoNote-1.0.2-x86_64.AppImage
+```
+(Needs FUSE, which Fedora ships. Elsewhere install `fuse`/`libfuse2`, or run with `--appimage-extract-and-run`.)
+
+Then:
+
+1. The first-run screen downloads two model files (2.7 GB total) from Hugging Face and verifies their
    SHA-256 checksums. **This is the only time EchoNote uses the network.**
-3. Click **Set up GNOME shortcut** (on GNOME/Wayland) — the default shortcut is <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd>.
+2. Click **Set up GNOME shortcut** (on GNOME/Wayland). The default shortcut is <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd>.
 
 Nothing else is needed: no Node.js, Python, Ollama, compiler, database server or manual model files.
-The inference runtimes (`whisper-server`, `llama-server`) are inside the AppImage.
+The inference runtimes (`whisper-server`, `llama-server`) are inside the package.
 
 **Requirements:** x86-64 CPU with AVX2 (Intel Haswell / AMD Zen or newer), ~4.5 GB free RAM for the
 default models (smaller models are available in Settings for low-memory machines), ~3 GB disk for models.
 Tested on Fedora 44, GNOME 50 (Wayland). Other distributions/desktops are untested.
+
+## Uninstall
+
+1. *(Optional, removes your notes and the 2.7 GB of models.)* In EchoNote open **Settings → Delete all
+   data**, tick **Also delete downloaded models**, type `DELETE`, and confirm. This also removes the GNOME
+   shortcut and the launch-at-login entry.
+2. Quit EchoNote: **Settings → Quit EchoNote completely** (closing the window keeps it running in the background).
+3. Remove the app:
+   * **RPM:** GNOME Software → *Installed* → EchoNote → **Uninstall**, or `sudo dnf remove echonote`.
+   * **AppImage:** delete the `.AppImage` file (and any menu entry you created for it).
+
+If you skipped step 1, your data stays in `~/.config/EchoNote` (delete that folder to remove it), and the
+GNOME shortcut can be removed in GNOME Settings → Keyboard → Custom Shortcuts.
 
 ## Using it
 
@@ -142,14 +167,15 @@ appearance of the desktop notification — check these manually (see below).
 
 ## Build from source
 
-Requires Node.js 24 (`.nvmrc`), git, g++, cmake (or `CMAKE="uvx --from cmake cmake"`).
+Requires Node.js 24 (`.nvmrc`), git, g++, cmake (or `CMAKE="uvx --from cmake cmake"`). Building the RPM
+also needs `rpmbuild` and `libxcrypt-compat` (electron-builder's bundled fpm links against `libcrypt.so.1`).
 
 ```bash
 npm ci
 npm run native:build        # builds whisper-server + llama-server into resources/bin/linux-x64
 npm run models:prepare      # optional: pre-download default models to ~/.config/EchoNote/models
 npm run dev                 # run in development
-npm run package:linux       # -> dist/EchoNote-1.0.1-x86_64.AppImage
+npm run package:linux       # -> dist/EchoNote-<version>-x86_64.AppImage and dist/echonote-<version>.x86_64.rpm
 ```
 
 ## Limitations
@@ -165,7 +191,7 @@ npm run package:linux       # -> dist/EchoNote-1.0.1-x86_64.AppImage
   has not been tested with real speech.
 * One primary intent per recording; a note containing several tasks becomes one item.
 * The tray icon needs the AppIndicator extension on GNOME.
-* Models are downloaded at first run (not bundled) to keep the AppImage at 135 MB.
+* Models are downloaded at first run (not bundled) to keep the packages small (AppImage 135 MB, RPM 96 MB).
 * Gemma 4 E2B needs ~4 GB of RAM; on machines with less free memory EchoNote offers the smaller models.
 
 ## License

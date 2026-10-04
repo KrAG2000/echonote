@@ -287,7 +287,7 @@ export function SettingsPage({
             checked={settings.launchAtLogin}
             onChange={(e) => void update({ launchAtLogin: e.target.checked })}
           />
-          Launch at login (AppImage build only)
+          Launch at login (installed app only)
         </label>
         <p className="hint">
           Reminders are delivered only while EchoNote is running. Missed reminders are shown as overdue at

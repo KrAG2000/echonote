@@ -3,8 +3,8 @@ import os from 'node:os'
 import path from 'node:path'
 
 /**
- * Launch-at-login on Linux via an XDG autostart entry. Only supported for the AppImage build,
- * because a development checkout has no stable executable to point at.
+ * Launch-at-login on Linux via an XDG autostart entry. Supported for the AppImage and RPM builds;
+ * a development checkout has no stable executable to point at.
  */
 export function autostartFile(): string {
   const configHome = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config')
@@ -19,9 +19,10 @@ export function setLaunchAtLogin(enabled: boolean): { ok: boolean; message: stri
     fs.rmSync(file, { force: true })
     return { ok: true, message: null }
   }
-  const exe = process.env.APPIMAGE
+  // AppImage: the .AppImage file; RPM install: /opt/EchoNote/echonote. Not available from a dev checkout.
+  const exe = process.env.APPIMAGE || (process.defaultApp ? null : process.execPath)
   if (!exe) {
-    return { ok: false, message: 'Launch at login is available in the installed AppImage build only.' }
+    return { ok: false, message: 'Launch at login is available in the installed app only.' }
   }
   fs.mkdirSync(path.dirname(file), { recursive: true })
   const quoted = `"${exe.replace(/(["\\`$])/g, '\\$1')}"`

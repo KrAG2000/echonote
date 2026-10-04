@@ -1,4 +1,9 @@
-"""Generates the app and tray icons (PNG) used by EchoNote. Requires Pillow."""
+"""Generates EchoNote's icons. Requires Pillow.
+
+- resources/icon.png (512 px) and resources/branding/echonote-1024.png: the app icon, made from
+  echonote.png in the project root (white background made transparent, cropped, padded).
+- resources/tray.png, resources/tray-recording.png: small monochrome tray icons.
+"""
 from PIL import Image, ImageDraw
 import os
 
@@ -38,7 +43,40 @@ def icon(size: int, recording: bool = False, tray: bool = False) -> Image.Image:
     return img.resize((size, size), Image.LANCZOS)
 
 
-icon(512).save(os.path.join(OUT, 'icon.png'))
+def app_icon() -> None:
+    from collections import deque
+
+    src = Image.open(os.path.join(OUT, '..', 'echonote.png')).convert('RGBA')
+    w, h = src.size
+    px = src.load()
+    transparent = Image.new('L', (w, h), 0)
+    mask = transparent.load()
+    seen = bytearray(w * h)
+    queue = deque([(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)])
+    while queue:  # flood-fill the white background from the corners
+        x, y = queue.popleft()
+        if seen[y * w + x]:
+            continue
+        seen[y * w + x] = 1
+        r, g, b, _ = px[x, y]
+        if not (r > 235 and g > 235 and b > 235):
+            continue
+        mask[x, y] = 255
+        for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if 0 <= nx < w and 0 <= ny < h and not seen[ny * w + nx]:
+                queue.append((nx, ny))
+    alpha = Image.eval(transparent, lambda v: 255 - v)
+    src.putalpha(alpha)
+    cropped = src.crop(alpha.point(lambda v: 255 if v > 10 else 0).getbbox())
+    side = max(cropped.size)
+    pad = int(side * 0.06)
+    final = Image.new('RGBA', (side + 2 * pad, side + 2 * pad), (0, 0, 0, 0))
+    final.paste(cropped, (pad + (side - cropped.size[0]) // 2, pad + (side - cropped.size[1]) // 2), cropped)
+    final.resize((1024, 1024), Image.LANCZOS).save(os.path.join(OUT, 'branding', 'echonote-1024.png'))
+    final.resize((512, 512), Image.LANCZOS).save(os.path.join(OUT, 'icon.png'))
+
+
+app_icon()
 icon(32, tray=True).save(os.path.join(OUT, 'tray.png'))
 icon(32, recording=True, tray=True).save(os.path.join(OUT, 'tray-recording.png'))
 print('icons written')

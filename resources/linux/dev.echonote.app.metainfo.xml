@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream metadata: lets GNOME Software show EchoNote under Installed, with an Uninstall button. -->
+<component type="desktop-application">
+  <id>dev.echonote.app</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>EchoNote</name>
+  <summary>Say a thought, get an organized task, reminder, idea or note</summary>
+  <description>
+    <p>
+      Press a shortcut, speak, and keep working. EchoNote transcribes your voice with whisper.cpp and
+      organizes it with Google's open-weight Gemma 4 model through llama.cpp into tasks, reminders
+      (with desktop notifications), ideas and reference notes.
+    </p>
+    <p>
+      Everything runs on your computer. After a one-time model download there is no network access,
+      no account and no API key.
+    </p>
+  </description>
+  <launchable type="desktop-id">echonote.desktop</launchable>
+  <url type="homepage">https://github.com/KrAG2000/echonote</url>
+  <url type="bugtracker">https://github.com/KrAG2000/echonote/issues</url>
+  <developer id="io.github.krag2000">
+    <name>Kartik Agnihotri</name>
+  </developer>
+  <categories>
+    <category>Utility</category>
+    <category>Office</category>
+  </categories>
+  <keywords>
+    <keyword>voice</keyword>
+    <keyword>notes</keyword>
+    <keyword>reminders</keyword>
+    <keyword>tasks</keyword>
+    <keyword>offline</keyword>
+  </keywords>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/KrAG2000/echonote/main/docs/screenshots/capture.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.0.2" date="2026-10-05"/>
+    <release version="1.0.1" date="2026-10-05"/>
+    <release version="1.0.0" date="2026-10-04"/>
+  </releases>
+</component>
