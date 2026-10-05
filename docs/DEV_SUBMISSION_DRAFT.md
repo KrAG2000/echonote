@@ -143,9 +143,10 @@ I’ve tried to make sure that those without GPUs can work with it too. The benc
 
 I built EchoNote with an AI coding agent (Claude Code). These are curated highlights of the session: the
 spec, the dead ends (Electron's global shortcut on Wayland, a CPU throttled to power-saver), the Gemma
-benchmark, the bugs the tests caught, and the packaging work, with the real tool output.
+benchmark, the bugs the tests caught, the packaging work, and a last-morning bug hunt from my own testing
+(a double-toggling shortcut and a flickering popup, traced from the app's logs), with the real tool output.
 
-{% agent_session building-echonote-a-local-voice-to-action-assistant-with-whispercpp-gemma-4-highlights-lzr147 %}
+{% agent_session building-echonote-a-local-voice-to-action-assistant-with-whispercpp-gemma-4-highlights-4aessf %}
 
 ## Prize Categories
 
