@@ -136,11 +136,16 @@ this hardware — but because the transcript is saved first, nothing you said wa
   Gemma 4 E2B and Qwen2.5 are Apache-2.0 (Gemma 3 1B uses Google's Gemma Terms of Use). These are open-*weight* models — their training data isn't public.
 
 Where open was harder: CPU-only inference on a power-saving laptop is slower than a hosted API, Wayland had
-no ready-made global shortcut, and I had to package the native inference binaries myself.
+no ready-made global shortcut and I had to package the native inference binaries myself, says Claude.
+I’ve tried to make sure that those without GPUs can work with it too. The benchmarks are CPU only numbers. With GPU acceleration, the AI processing can be approximately 2-4 times faster, reducing the overall organizing time significantly depending on the GPU available.
 
 ## My Agent Session
 
-*(Optional — add a DevRelay session embed here if you save one.)*
+I built EchoNote with an AI coding agent (Claude Code). These are curated highlights of the session: the
+spec, the dead ends (Electron's global shortcut on Wayland, a CPU throttled to power-saver), the Gemma
+benchmark, the bugs the tests caught, and the packaging work, with the real tool output.
+
+{% agent_session building-echonote-a-local-voice-to-action-assistant-with-whispercpp-gemma-4-highlights-lzr147 %}
 
 ## Prize Categories
 
