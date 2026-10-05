@@ -24,8 +24,12 @@ export class ShortcutManager {
     private readonly logger: Logger,
     private readonly onPress: () => void,
     /** Named pipe the desktop shortcut writes to (see toggle-pipe.ts). */
-    private readonly pipePath: string
-  ) {}
+    private readonly pipePath: string,
+    /** False for non-default profiles: they must not touch the desktop-wide GNOME shortcut. */
+    private readonly manageDesktopShortcut = true
+  ) {
+    if (!manageDesktopShortcut) this.state.desktopShortcutAvailable = false
+  }
 
   private desktopCommand(): string {
     return shortcutCommand(this.pipePath, gnome.appCommand())
@@ -54,7 +58,7 @@ export class ShortcutManager {
       return this.state
     }
 
-    if (gnome.isGnome()) {
+    if (gnome.isGnome() && this.manageDesktopShortcut) {
       if (await gnome.isInstalled()) {
         try {
           await gnome.install(accelerator, this.desktopCommand()) // update binding + command
@@ -88,6 +92,8 @@ export class ShortcutManager {
 
   async installDesktopShortcut(accelerator: string): Promise<ShortcutStatus> {
     if (!gnome.isGnome()) throw new Error('Desktop shortcuts can only be set up automatically on GNOME.')
+    if (!this.manageDesktopShortcut)
+      throw new Error('Only the default EchoNote profile can set up the desktop shortcut.')
     await gnome.install(accelerator, this.desktopCommand())
     this.logger.info('shortcut: GNOME custom shortcut installed', { accelerator })
     this.state = { ...this.state, accelerator, registered: true, method: 'desktop', message: null }
@@ -95,6 +101,7 @@ export class ShortcutManager {
   }
 
   async removeDesktopShortcut(): Promise<ShortcutStatus> {
+    if (!this.manageDesktopShortcut) return this.state
     await gnome.uninstall()
     this.logger.info('shortcut: GNOME custom shortcut removed')
     return this.register(this.state.accelerator)

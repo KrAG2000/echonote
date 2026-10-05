@@ -30,20 +30,20 @@ Download from the [latest release](https://github.com/KrAG2000/echonote/releases
 and in GNOME Software under *Installed*, and can be uninstalled from there.
 
 ```bash
-sudo dnf install ./echonote-1.0.4.x86_64.rpm
+sudo dnf install ./echonote-1.0.5.x86_64.rpm
 ```
 
 **Debian / Ubuntu: DEB package.** Same as the RPM: app menu, GNOME Software / App Center, normal uninstall.
 
 ```bash
-sudo apt install ./echonote_1.0.4_amd64.deb
+sudo apt install ./echonote_1.0.5_amd64.deb
 ```
 
 **Any other distribution: AppImage.** A single portable file; nothing is installed.
 
 ```bash
-chmod +x EchoNote-1.0.4-x86_64.AppImage
-./EchoNote-1.0.4-x86_64.AppImage
+chmod +x EchoNote-1.0.5-x86_64.AppImage
+./EchoNote-1.0.5-x86_64.AppImage
 ```
 (Needs FUSE, which Fedora ships. Elsewhere install `fuse`/`libfuse2`, or run with `--appimage-extract-and-run`.)
 

@@ -121,6 +121,7 @@ export class EchoApp {
       () => this.onRecorderChange(),
       this.logger
     )
+    this.windows.canHideOverlay = () => this.recorder.state === 'idle'
     this.trayActions = {
       toggleRecording: () => this.toggleRecording('tray'),
       showMain: () => this.windows.showMain(),
@@ -131,7 +132,14 @@ export class EchoApp {
     const pipePath = togglePipePath(this.paths.userData)
     this.togglePipe = new TogglePipe(pipePath, this.logger, () => this.toggleRecording('shortcut'))
     this.togglePipe.start()
-    this.shortcuts = new ShortcutManager(this.logger, () => this.toggleRecording('shortcut'), pipePath)
+    // Only the normal profile owns the desktop-wide GNOME shortcut. Instances with a custom data
+    // directory (tests, ECHONOTE_USER_DATA) must never rewrite it to point at themselves.
+    this.shortcuts = new ShortcutManager(
+      this.logger,
+      () => this.toggleRecording('shortcut'),
+      pipePath,
+      !process.env.ECHONOTE_USER_DATA
+    )
     void this.shortcuts.register(this.settings.shortcut).then(() => {
       this.pushStatus()
     })

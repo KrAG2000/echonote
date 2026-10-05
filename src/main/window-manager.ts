@@ -124,9 +124,15 @@ export class WindowManager {
     if (!win.isVisible()) win.showInactive()
   }
 
+  /** Set by the app: the popup must never be hidden while a recording is in progress. */
+  canHideOverlay: () => boolean = () => true
+
   hideOverlay(afterMs = 0): void {
     if (this.overlayHideTimer) clearTimeout(this.overlayHideTimer)
-    this.overlayHideTimer = setTimeout(() => this.overlay?.hide(), afterMs)
+    this.overlayHideTimer = setTimeout(() => {
+      // A result for an earlier note can arrive while a new recording runs; keep the popup then.
+      if (this.canHideOverlay()) this.overlay?.hide()
+    }, afterMs)
   }
 
   /** Sends a command to the window that hosts the recorder. */
