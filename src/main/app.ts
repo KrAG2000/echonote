@@ -1,5 +1,7 @@
 import { app, dialog, Notification, session, shell } from 'electron'
 import fs from 'node:fs'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import fsp from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -29,6 +31,7 @@ import { ShortcutManager } from './shortcut-manager'
 import { setLaunchAtLogin } from './autostart'
 import { TogglePipe, togglePipePath } from './toggle-pipe'
 import type {
+  RecorderState,
   AppStatus,
   Capture,
   CaptureUpdate,
@@ -37,6 +40,8 @@ import type {
   Settings,
   ShortcutStatus
 } from '../shared/types'
+
+const execFileAsync = promisify(execFile)
 
 export class UserError extends Error {
   constructor(
@@ -70,6 +75,8 @@ export class EchoApp {
   private hiddenNoticeShown = false
   private trayActions!: TrayActions
   private togglePipe: TogglePipe | null = null
+  private topBarIndicator = false
+  private lastRecorderState: RecorderState = 'idle'
 
   constructor(readonly paths: AppPaths) {
     this.logger = createLogger(paths.logs, { echo: !app.isPackaged })
@@ -105,7 +112,12 @@ export class EchoApp {
     })
 
     this.recorder = new RecordingController(
-      (command) => this.windows.sendToRecorder({ type: 'recorder-command', command }),
+      (command) =>
+        this.windows.sendToRecorder({
+          type: 'recorder-command',
+          command,
+          ...(command === 'start' ? { silenceStopMs: this.settings.silenceStopSeconds * 1000 } : {})
+        }),
       () => this.onRecorderChange(),
       this.logger
     )
@@ -114,14 +126,13 @@ export class EchoApp {
       showMain: () => this.windows.showMain(),
       quit: () => app.quit()
     }
-    this.windows.createTray(this.trayActions)
+    void this.detectTopBar()
 
     const pipePath = togglePipePath(this.paths.userData)
     this.togglePipe = new TogglePipe(pipePath, this.logger, () => this.toggleRecording('shortcut'))
     this.togglePipe.start()
     this.shortcuts = new ShortcutManager(this.logger, () => this.toggleRecording('shortcut'), pipePath)
     void this.shortcuts.register(this.settings.shortcut).then(() => {
-      this.windows.updateTray(this.recorder.state, this.shortcutLabel(), this.trayActions)
       this.pushStatus()
     })
 
@@ -241,11 +252,50 @@ export class EchoApp {
 
   private onRecorderChange(): void {
     const st = this.recorder.state
-    this.windows.updateTray(st, this.shortcutLabel(), this.trayActions)
-    if (st === 'starting' || st === 'recording' || st === 'stopping') this.windows.showOverlay()
-    if (st === 'idle' && this.recorder.lastError) this.windows.hideOverlay(5000)
+    const prev = this.lastRecorderState
+    this.lastRecorderState = st
+    if (st === 'starting' || st === 'recording' || st === 'stopping') {
+      this.windows.setIndicator('recording', this.trayActions)
+      if (this.popupEnabled()) this.windows.showOverlay()
+    } else if (st === 'idle') {
+      const saved = prev === 'stopping' && !this.recorder.lastError
+      this.windows.setIndicator(saved ? 'done' : 'hidden', this.trayActions)
+      if (this.recorder.lastError) this.windows.hideOverlay(5000)
+    }
     this.pushStatus(true)
     if (st === 'idle' && this.quitAfterRecording) setTimeout(() => app.quit(), 300)
+  }
+
+  /** The floating popup is only needed when there is no top-bar indicator (unless forced). */
+  private popupEnabled(): boolean {
+    const mode = this.settings.recordingPopup
+    return mode === 'on' || (mode === 'auto' && !this.topBarIndicator)
+  }
+
+  /** Is a StatusNotifierItem host (e.g. GNOME's AppIndicator extension) running? */
+  private async detectTopBar(): Promise<void> {
+    try {
+      const { stdout } = await execFileAsync(
+        'gdbus',
+        [
+          'call',
+          '--session',
+          '--dest',
+          'org.freedesktop.DBus',
+          '--object-path',
+          '/org/freedesktop/DBus',
+          '--method',
+          'org.freedesktop.DBus.NameHasOwner',
+          'org.kde.StatusNotifierWatcher'
+        ],
+        { timeout: 3000 }
+      )
+      this.topBarIndicator = stdout.includes('true')
+    } catch {
+      this.topBarIndicator = false
+    }
+    this.logger.info('indicator: top bar available', { available: this.topBarIndicator })
+    this.pushStatus()
   }
 
   async submitRecording(p: {
@@ -253,10 +303,14 @@ export class EchoApp {
     durationMs: number
     startedAt: number
     stoppedAt: number
+    voiced?: boolean
   }): Promise<{ captureId: string }> {
     const receivedAt = Date.now()
     try {
       const info = parseWav(p.wav)
+      if (p.voiced === false) {
+        throw new AudioError('EMPTY_RECORDING', 'No speech was detected, so nothing was saved.')
+      }
       assertNotEmpty(info, measureLevels(p.wav).peak)
       const file = await saveWav(this.paths.audio, p.wav)
       const timings: Record<string, number> = {
@@ -390,7 +444,6 @@ export class EchoApp {
       if (id !== undefined && !this.models.entry(id)) throw new UserError('UNKNOWN_MODEL', 'Unknown model.')
     }
     this.settings = this.settingsRepo.update(patch)
-    this.windows.updateTray(this.recorder.state, this.shortcutLabel(), this.trayActions)
 
     if (patch.llmIdleUnloadMinutes !== undefined) {
       this.runtime.llama.idleUnloadMinutes = this.settings.llmIdleUnloadMinutes
@@ -409,14 +462,9 @@ export class EchoApp {
     return this.settings
   }
 
-  private shortcutLabel(): string {
-    return this.shortcuts.state.registered ? this.settings.shortcut : ''
-  }
-
   async installDesktopShortcut(): Promise<ShortcutStatus> {
     try {
       const r = await this.shortcuts.installDesktopShortcut(this.settings.shortcut)
-      this.windows.updateTray(this.recorder.state, this.shortcutLabel(), this.trayActions)
       this.pushStatus()
       return r
     } catch (err) {
@@ -429,7 +477,6 @@ export class EchoApp {
 
   async removeDesktopShortcut(): Promise<ShortcutStatus> {
     const r = await this.shortcuts.removeDesktopShortcut()
-    this.windows.updateTray(this.recorder.state, this.shortcutLabel(), this.trayActions)
     this.pushStatus()
     return r
   }
@@ -474,6 +521,7 @@ export class EchoApp {
       pipeline: act,
       shortcut: this.shortcuts.state,
       notificationsSupported: Notification.isSupported(),
+      topBarIndicator: this.topBarIndicator,
       setupCompleted: this.settings.setupCompleted,
       platform: `${process.platform}-${process.arch}`,
       sessionType: process.env.XDG_SESSION_TYPE ?? 'unknown'

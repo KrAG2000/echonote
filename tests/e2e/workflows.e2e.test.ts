@@ -375,4 +375,23 @@ describe('E2E', () => {
     }
     expect(all.data).toHaveLength(1)
   })
+
+  it('Workflow F: recording stops by itself after 5 s of silence and saves nothing', async () => {
+    const userData = newProfile()
+    const s = await launch({ userData, audio: fixture('silence') })
+    await expectText(s.page, 'pill-speech', /ready/, 60_000)
+    const t0 = Date.now()
+    toggleViaCli(s)
+    await expectText(s.page, 'record-state', /Recording/, 15_000)
+    await s.page.getByTestId('recording-error').waitFor({ timeout: 20_000 })
+    const elapsed = Date.now() - t0
+    expect(await s.page.getByTestId('recording-error').textContent()).toMatch(/No speech/)
+    expect(elapsed).toBeGreaterThan(4_500)
+    expect(elapsed).toBeLessThan(12_000)
+    const all = (await s.page.evaluate(() => window.echo.listCaptures({ view: 'all' }))) as {
+      ok: true
+      data: unknown[]
+    }
+    expect(all.data).toHaveLength(0)
+  })
 })

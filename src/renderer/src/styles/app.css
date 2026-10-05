@@ -779,6 +779,7 @@ body.overlay-body {
 .overlay {
   height: 100vh;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
   padding: 0 16px;

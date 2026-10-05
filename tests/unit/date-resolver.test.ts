@@ -49,6 +49,9 @@ describe('resolveDate', () => {
 
   it('relative durations', () => {
     expect(local(resolveDate('in 10 minutes', REF, opts).dueAt)).toBe('2026-10-07 14:15')
+    // Exact to the second, never rounded down (which would fire early).
+    const ref = new Date('2026-10-07T14:05:47+05:30')
+    expect(resolveDate('in two minutes', ref, opts).dueAt!.getTime() - ref.getTime()).toBe(120_000)
     expect(local(resolveDate('in two hours', REF, opts).dueAt)).toBe('2026-10-07 16:05')
   })
 

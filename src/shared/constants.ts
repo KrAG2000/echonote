@@ -34,7 +34,9 @@ export const DEFAULT_SETTINGS: Settings = {
   launchAtLogin: false,
   closeToBackground: true,
   notificationsEnabled: true,
-  setupCompleted: false
+  setupCompleted: false,
+  recordingPopup: 'auto',
+  silenceStopSeconds: 5
 }
 
 export const CATEGORY_LABELS = {

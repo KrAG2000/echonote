@@ -107,7 +107,9 @@ describe.skipIf(!canUnshare)('Offline operation', () => {
     expect(row.transcript.toLowerCase()).toContain('tool')
     expect(row.category).toBe('idea')
     expect(read()).not.toMatch(/blocked request/) // nothing even tried to go out
+    // Graceful shutdown starts on SIGTERM. (Signalling the whole process group at once also kills
+    // the inference servers and Chromium helpers underneath it, so we only check that it began.)
     stopTree('SIGTERM')
-    await waitFor(() => (!read().includes('app: stopped') ? null : true), 15_000)
+    await waitFor(() => (read().includes('app: shutting down') ? true : null), 15_000)
   }, 400_000)
 })

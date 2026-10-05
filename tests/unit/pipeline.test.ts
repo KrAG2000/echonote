@@ -227,6 +227,22 @@ describe('Pipeline', () => {
     expect(t.captures.get(id)!.category).toBeNull()
   })
 
+  it('resolves dates relative to when the note was spoken, not when it was organized', async () => {
+    const t = setup({
+      transcribe: async () => ({ text: 'Remind me tomorrow at 9 am to call mom', ms: 1 }),
+      classify: async () => ({
+        raw: llmJson({ category: 'reminder', date_expression: 'tomorrow at 9 am' }),
+        ms: 1
+      })
+    })
+    const id = t.add()
+    // Pretend the note was recorded three days ago and is only organized now.
+    t.db.prepare('UPDATE captures SET created_at = ? WHERE id = ?').run('2026-10-01T10:00:00.000Z', id)
+    t.pipeline.enqueueTranscription(id)
+    await until(() => t.captures.get(id)!.status === 'ready')
+    expect(t.captures.get(id)!.dueAt).toBe('2026-10-02T03:30:00.000Z') // Oct 2, 09:00 IST
+  })
+
   it('resume() re-queues work left over from a previous session', async () => {
     const t = setup({})
     const a = t.add() // processing, never transcribed

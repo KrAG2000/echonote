@@ -77,6 +77,24 @@ def app_icon() -> None:
 
 
 app_icon()
+def indicator(size: int, kind: str) -> Image.Image:
+    """Top-bar indicators: a plain red dot while recording, a green check right after."""
+    s = size * 4
+    img = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    if kind == 'recording':
+        r = s * 0.30
+        d.ellipse([s / 2 - r, s / 2 - r, s / 2 + r, s / 2 + r], fill=(230, 40, 40, 255))
+    else:
+        r = s * 0.36
+        d.ellipse([s / 2 - r, s / 2 - r, s / 2 + r, s / 2 + r], fill=(34, 160, 80, 255))
+        w = max(3, int(s * 0.08))
+        d.line([(s * 0.33, s * 0.52), (s * 0.45, s * 0.64), (s * 0.68, s * 0.38)], fill=(255, 255, 255, 255), width=w, joint='curve')
+    return img.resize((size, size), Image.LANCZOS)
+
+
+for name, kind in (('tray-recording', 'recording'), ('tray-done', 'done')):
+    indicator(32, kind).save(os.path.join(OUT, f'{name}.png'))
+    indicator(64, kind).save(os.path.join(OUT, f'{name}@2x.png'))
 icon(32, tray=True).save(os.path.join(OUT, 'tray.png'))
-icon(32, recording=True, tray=True).save(os.path.join(OUT, 'tray-recording.png'))
 print('icons written')

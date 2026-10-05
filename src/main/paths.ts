@@ -16,6 +16,7 @@ export interface AppPaths {
   icon: string
   trayIcon: string
   trayIconRecording: string
+  trayIconDone: string
   userData: string
   database: string
   models: string
@@ -33,6 +34,7 @@ export function resolvePaths(): AppPaths {
     icon: path.join(resources, 'icon.png'),
     trayIcon: path.join(resources, 'tray.png'),
     trayIconRecording: path.join(resources, 'tray-recording.png'),
+    trayIconDone: path.join(resources, 'tray-done.png'),
     userData,
     database: path.join(userData, 'echonote.db'),
     models: process.env.ECHONOTE_MODELS_DIR || path.join(userData, 'models'),

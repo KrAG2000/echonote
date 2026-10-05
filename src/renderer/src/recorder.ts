@@ -35,6 +35,8 @@ export class Recorder {
   private startedAt = 0
   private level = 0
   onLevel: ((level: number) => void) | null = null
+  /** Called with the RMS of every audio chunk (4096 samples = 256 ms). */
+  onChunk: ((rms: number) => void) | null = null
   /** Called if the input device disappears mid-recording. */
   onDeviceLost: (() => void) | null = null
 
@@ -65,6 +67,9 @@ export class Recorder {
         for (let i = 0; i < e.data.length; i++) peak = Math.max(peak, Math.abs(e.data[i]))
         this.level = this.level * 0.6 + peak * 0.4
         this.onLevel?.(this.level)
+        let sum = 0
+        for (let i = 0; i < e.data.length; i++) sum += e.data[i] * e.data[i]
+        this.onChunk?.(Math.sqrt(sum / e.data.length))
       }
       source.connect(this.node)
       if (this.ctx.state === 'suspended') await this.ctx.resume()

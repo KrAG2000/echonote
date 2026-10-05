@@ -63,9 +63,9 @@ front that this download is the only time EchoNote uses the network:
   in GNOME Software and uninstalls from there, and a portable AppImage for other distributions.
 
 ```bash
-sudo dnf install ./echonote-1.0.2.x86_64.rpm      # Fedora
+sudo dnf install ./echonote-1.0.3.x86_64.rpm      # Fedora
 # or
-chmod +x EchoNote-1.0.2-x86_64.AppImage && ./EchoNote-1.0.2-x86_64.AppImage
+chmod +x EchoNote-1.0.3-x86_64.AppImage && ./EchoNote-1.0.3-x86_64.AppImage
 ```
 
 Tested on Fedora 44 / GNOME 50 (Wayland). Needs an x86-64 CPU with AVX2 and about 4.5 GB of free RAM (smaller models are available in Settings).

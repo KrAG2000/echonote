@@ -4,7 +4,8 @@
 reminder, idea or reference note — using speech recognition and a language model that run entirely
 on your own computer.
 
-* 🎙 **Capture in one keystroke** from any app. A small overlay shows that the microphone is live.
+* 🎙 **Capture in one keystroke** from any app. A red dot in the top bar shows while the microphone is live
+  (like GNOME's screen recorder), and recording stops by itself after 5 seconds of silence.
 * 📝 **Local speech-to-text** with [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
 * 🧠 **Local organizing** with [llama.cpp](https://github.com/ggml-org/llama.cpp) and Google's open-weight **Gemma 4** (E2B):
   category, short title, summary, action, and the date phrase you said.
@@ -29,14 +30,14 @@ Download from the [latest release](https://github.com/KrAG2000/echonote/releases
 and in GNOME Software under *Installed*, and can be uninstalled from there.
 
 ```bash
-sudo dnf install ./echonote-1.0.2.x86_64.rpm
+sudo dnf install ./echonote-1.0.3.x86_64.rpm
 ```
 
 **Any other distribution: AppImage.** A single portable file; nothing is installed.
 
 ```bash
-chmod +x EchoNote-1.0.2-x86_64.AppImage
-./EchoNote-1.0.2-x86_64.AppImage
+chmod +x EchoNote-1.0.3-x86_64.AppImage
+./EchoNote-1.0.3-x86_64.AppImage
 ```
 (Needs FUSE, which Fedora ships. Elsewhere install `fuse`/`libfuse2`, or run with `--appimage-extract-and-run`.)
 
@@ -68,14 +69,19 @@ GNOME shortcut can be removed in GNOME Settings → Keyboard → Custom Shortcut
 
 ## Using it
 
-* Press the shortcut (or the big button, or the tray menu), speak, press it again.
+* Press the shortcut (or the big button), speak, then press it again, or just stop talking: after 5 s of
+  silence the recording stops automatically (Settings → While recording). If nothing was said, nothing is saved.
+* While recording, a **red dot** appears in the top bar. After you stop, a **green check** shows for 3 s and
+  then disappears. On GNOME this needs the AppIndicator extension
+  (`sudo dnf install gnome-shell-extension-appindicator`, then log out and in). Without it, EchoNote shows a
+  small floating popup instead, and GNOME's own microphone icon still appears in the top bar.
 * Within a few seconds the note appears under **Tasks / Reminders / Ideas / Reference**.
 * If EchoNote isn't sure — e.g. "remind me next Friday" said on a Tuesday, a reminder with no date, or
   an unclear category — the note goes to **Inbox → Needs confirmation** with the reason and a
   pre-filled date you can correct.
 * Search finds text in transcripts, titles and summaries.
 * Closing the window keeps EchoNote running in the background so reminders and the shortcut work.
-  Quit from the tray menu or Settings.
+  Quit from Settings → Quit EchoNote completely.
 
 ## How it works
 
@@ -190,7 +196,8 @@ npm run package:linux       # -> dist/EchoNote-<version>-x86_64.AppImage and dis
 * English is the tested language. The multilingual Whisper model for Hindi/Hinglish is selectable but
   has not been tested with real speech.
 * One primary intent per recording; a note containing several tasks becomes one item.
-* The tray icon needs the AppIndicator extension on GNOME.
+* The top-bar recording indicator needs the AppIndicator extension on GNOME (stock GNOME has no tray);
+  without it a floating popup is used.
 * Models are downloaded at first run (not bundled) to keep the packages small (AppImage 135 MB, RPM 96 MB).
 * Gemma 4 E2B needs ~4 GB of RAM; on machines with less free memory EchoNote offers the smaller models.
 

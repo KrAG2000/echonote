@@ -78,6 +78,10 @@ export interface Settings {
   closeToBackground: boolean
   notificationsEnabled: boolean
   setupCompleted: boolean
+  /** Floating recording popup: 'auto' shows it only when no top-bar indicator can be shown. */
+  recordingPopup: 'auto' | 'on' | 'off'
+  /** Stop recording automatically after this many seconds without speech (0 = never). */
+  silenceStopSeconds: number
 }
 
 export type RecorderState = 'idle' | 'starting' | 'recording' | 'stopping'
@@ -144,6 +148,8 @@ export interface AppStatus {
   pipeline: PipelineActivity
   shortcut: ShortcutStatus
   notificationsSupported: boolean
+  /** True when the desktop can show the top-bar recording indicator (StatusNotifierItem host). */
+  topBarIndicator: boolean
   setupCompleted: boolean
   platform: string
   sessionType: string
@@ -198,7 +204,7 @@ export type Result<T> = { ok: true; data: T } | { ok: false; error: ErrorInfo }
 export type PushEvent =
   | { type: 'status'; status: AppStatus }
   | { type: 'captures-changed' }
-  | { type: 'recorder-command'; command: 'start' | 'stop' | 'cancel' }
+  | { type: 'recorder-command'; command: 'start' | 'stop' | 'cancel'; silenceStopMs?: number }
   | { type: 'navigate'; view: string; captureId?: string }
   | { type: 'toast'; level: 'info' | 'success' | 'error'; message: string }
   | {

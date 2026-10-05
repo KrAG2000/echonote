@@ -68,6 +68,7 @@ export interface EchoApi {
     rms: number
     startedAt: number
     stoppedAt: number
+    voiced?: boolean
   }): Promise<Result<{ captureId: string }>>
   listReminders(): Promise<Result<ReminderWithCapture[]>>
   getStatus(): Promise<Result<AppStatus>>

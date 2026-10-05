@@ -244,7 +244,9 @@ export class Pipeline {
         return
       }
 
-      const v = validateClassification(raw, c.transcript, new Date(), {
+      // Dates are relative to when the note was spoken, not when the model got to it (an inbox item
+      // may be organized hours later, e.g. after the model finished downloading).
+      const v = validateClassification(raw, c.transcript, new Date(c.createdAt), {
         defaultHour: this.d.settings().defaultReminderHour
       })
       this.mark(id, 'validationFinished')

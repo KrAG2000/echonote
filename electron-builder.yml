@@ -19,10 +19,9 @@ extraResources:
     to: models.json
   - from: resources/icon.png
     to: icon.png
-  - from: resources/tray.png
-    to: tray.png
-  - from: resources/tray-recording.png
-    to: tray-recording.png
+  - from: resources
+    to: .
+    filter: ['tray*.png']
 asar: true
 # Reuse the Electron build already in node_modules (no second download).
 electronDist: node_modules/electron/dist

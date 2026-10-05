@@ -2,7 +2,7 @@ import { BrowserWindow, Menu, Tray, nativeImage, screen, type WebPreferences } f
 import path from 'node:path'
 import type { AppPaths } from './paths'
 import type { Logger } from './logger'
-import type { PushEvent, RecorderState } from '../shared/types'
+import type { PushEvent } from '../shared/types'
 import { PUSH_CHANNEL } from '../shared/api'
 
 const secureWebPreferences = (preload: string): WebPreferences => ({
@@ -148,36 +148,47 @@ export class WindowManager {
     }
   }
 
-  createTray(actions: TrayActions): void {
+  private indicatorTimer: NodeJS.Timeout | null = null
+
+  /**
+   * Top-bar recording indicator, like GNOME's screen-recording dot: a red dot exists only while
+   * the microphone is recording, a green check is shown for a few seconds after it stops, and
+   * otherwise there is no icon at all. Needs a StatusNotifierItem host (on GNOME: the AppIndicator
+   * extension); without one the icon is simply not shown.
+   */
+  setIndicator(kind: 'recording' | 'done' | 'hidden', actions: TrayActions): void {
+    if (this.indicatorTimer) clearTimeout(this.indicatorTimer)
+    this.indicatorTimer = null
+    if (kind === 'hidden') {
+      this.tray?.destroy()
+      this.tray = null
+      return
+    }
     try {
-      this.tray = new Tray(nativeImage.createFromPath(this.paths.trayIcon))
-      this.tray.setToolTip('EchoNote')
-      this.tray.on('click', () => actions.showMain())
-      this.updateTray('idle', '', actions)
+      const icon = nativeImage.createFromPath(
+        kind === 'recording' ? this.paths.trayIconRecording : this.paths.trayIconDone
+      )
+      if (!this.tray) {
+        this.tray = new Tray(icon)
+        this.tray.on('click', () => actions.showMain())
+      } else {
+        this.tray.setImage(icon)
+      }
+      this.tray.setToolTip(kind === 'recording' ? 'EchoNote is recording' : 'EchoNote: recording saved')
+      this.tray.setContextMenu(
+        Menu.buildFromTemplate([
+          kind === 'recording'
+            ? { label: '■ Stop recording', click: () => actions.toggleRecording() }
+            : { label: 'Recording saved', enabled: false },
+          { label: 'Open EchoNote', click: () => actions.showMain() }
+        ])
+      )
     } catch (err) {
-      this.logger.warn('tray: unavailable', { err: err as Error })
+      this.logger.warn('indicator: unavailable', { err: err as Error })
       this.tray = null
     }
-  }
-
-  updateTray(state: RecorderState, shortcut: string, actions: TrayActions): void {
-    if (!this.tray) return
-    const recording = state === 'recording' || state === 'starting'
-    this.tray.setImage(
-      nativeImage.createFromPath(recording ? this.paths.trayIconRecording : this.paths.trayIcon)
-    )
-    this.tray.setToolTip(recording ? 'EchoNote — microphone is recording' : 'EchoNote')
-    this.tray.setContextMenu(
-      Menu.buildFromTemplate([
-        {
-          label: recording ? '■ Stop recording' : `● Start recording${shortcut ? `  (${shortcut})` : ''}`,
-          enabled: state === 'idle' || state === 'recording',
-          click: () => actions.toggleRecording()
-        },
-        { label: 'Open EchoNote', click: () => actions.showMain() },
-        { type: 'separator' },
-        { label: 'Quit EchoNote', click: () => actions.quit() }
-      ])
-    )
+    if (kind === 'done') {
+      this.indicatorTimer = setTimeout(() => this.setIndicator('hidden', actions), 3000)
+    }
   }
 }

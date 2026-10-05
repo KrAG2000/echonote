@@ -11,7 +11,7 @@ personal content).
   (visible in GNOME Settings → Keyboard → Custom Shortcuts) that runs `EchoNote --toggle`.
   If nothing happens, check that the key combination is not already used by GNOME.
 * **Other Wayland desktops**: bind a custom shortcut in your desktop settings to
-  `/path/to/EchoNote-1.0.2-x86_64.AppImage --toggle` (RPM install: `echonote --toggle`).
+  `/path/to/EchoNote-1.0.3-x86_64.AppImage --toggle` (RPM install: `echonote --toggle`).
 * **X11**: the shortcut is registered directly. If registration fails, another app owns the keys —
   choose a different combination in Settings.
 * You can always record with the big button, the overlay's Stop button or the tray menu.
@@ -49,10 +49,17 @@ background (unless disabled in Settings). Reminders that came due while EchoNote
 shown once as "Overdue" at the next start. Enable **Launch at login** (AppImage build) to have it
 start automatically. Check that notifications are not muted (GNOME "Do Not Disturb").
 
-## The tray icon is missing
+## No red dot in the top bar while recording
 
-GNOME does not show tray icons without the AppIndicator extension. Everything is also reachable from
-the window and the overlay; launching EchoNote again brings the window back.
+GNOME does not show app indicators without the AppIndicator extension:
+`sudo dnf install gnome-shell-extension-appindicator`, then log out and back in (and enable it in the
+Extensions app if needed). Until then EchoNote shows a floating popup while recording (Settings → While
+recording → Floating recording popup), and GNOME's own microphone icon appears in the top bar.
+
+## Recording stops by itself
+
+That's the silence auto-stop: after 5 s without speech the recording ends (and is discarded if nothing
+was said). Change or disable it in Settings → While recording.
 
 ## Reset everything
 

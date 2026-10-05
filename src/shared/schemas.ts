@@ -65,7 +65,9 @@ export const settingsPatchSchema = z
     launchAtLogin: z.boolean(),
     closeToBackground: z.boolean(),
     notificationsEnabled: z.boolean(),
-    setupCompleted: z.boolean()
+    setupCompleted: z.boolean(),
+    recordingPopup: z.enum(['auto', 'on', 'off']),
+    silenceStopSeconds: z.number().int().min(0).max(60)
   })
   .partial()
   .strict()
@@ -110,7 +112,9 @@ export const recorderSubmitSchema = z
     peak: z.number().min(0).max(1),
     rms: z.number().min(0).max(1),
     startedAt: z.number(),
-    stoppedAt: z.number()
+    stoppedAt: z.number(),
+    /** False when the renderer's voice detector heard no speech at all. */
+    voiced: z.boolean().optional()
   })
   .strict()
 

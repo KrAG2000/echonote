@@ -72,7 +72,11 @@ export function resolveDate(
   } else if (parsed) {
     const start = parsed.start
     date = start.date()
-    if (!start.isCertain('hour')) {
+    // "in 10 minutes" is exact relative to now: keep it as is (rounding to the minute would fire early).
+    const relative = start.tags?.().has('result/relativeDate') ?? false
+    if (relative && start.isCertain('minute')) {
+      // keep the exact instant
+    } else if (!start.isCertain('hour')) {
       const pod = partOfDayHour(expr)
       date.setHours(pod ?? opts.defaultHour, 0, 0, 0)
       timeDefaulted = true

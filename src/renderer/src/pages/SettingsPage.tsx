@@ -144,6 +144,52 @@ export function SettingsPage({
       </section>
 
       <section>
+        <h2>While recording</h2>
+        <label className="field">
+          Stop automatically after silence
+          <select
+            value={settings.silenceStopSeconds}
+            onChange={(e) => void update({ silenceStopSeconds: Number(e.target.value) })}
+            data-testid="silence-select"
+          >
+            <option value={0}>Never (stop manually)</option>
+            {[3, 5, 8, 10, 15].map((n) => (
+              <option key={n} value={n}>
+                After {n} seconds without speech
+              </option>
+            ))}
+          </select>
+        </label>
+        <p className="hint">
+          If nothing at all was said before the silence stop, the recording is discarded.
+        </p>
+        <label className="field">
+          Floating recording popup
+          <select
+            value={settings.recordingPopup}
+            onChange={(e) => void update({ recordingPopup: e.target.value as Settings['recordingPopup'] })}
+          >
+            <option value="auto">Automatic (only when the top-bar indicator isn't available)</option>
+            <option value="on">Always show</option>
+            <option value="off">Never show</option>
+          </select>
+        </label>
+        <p className="hint" data-testid="topbar-hint">
+          Top-bar indicator:{' '}
+          {status.topBarIndicator ? (
+            <>available. A red dot shows while recording and a green check for 3 seconds after you stop.</>
+          ) : (
+            <>
+              not available on this desktop. On GNOME, install and enable the AppIndicator extension (
+              <code>sudo dnf install gnome-shell-extension-appindicator</code>, then log out and back in) to
+              get a red dot in the top bar while recording. GNOME's own microphone icon still appears there
+              either way.
+            </>
+          )}
+        </p>
+      </section>
+
+      <section>
         <h2>Speech recognition</h2>
         <label className="field">
           Model
