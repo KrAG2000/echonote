@@ -32,7 +32,10 @@ linux:
       arch: [x64]
     - target: rpm
       arch: [x64]
+    - target: deb
+      arch: [x64]
   category: Utility
+  maintainer: Kartik Agnihotri <agni5kartik@gmail.com>
   syncDesktopName: true
   icon: resources/icon.png
   synopsis: Local-first voice notes, tasks and reminders
@@ -48,6 +51,15 @@ rpm:
   packageName: echonote
   vendor: Kartik Agnihotri
   maintainer: Kartik Agnihotri <agni5kartik@gmail.com>
+  fpm:
+    - resources/linux/dev.echonote.app.metainfo.xml=/usr/share/metainfo/dev.echonote.app.metainfo.xml
+# Debian / Ubuntu package: same layout as the RPM (/opt/EchoNote, menu entry, AppStream metadata),
+# so it shows up in GNOME Software / Ubuntu App Center and uninstalls from there.
+deb:
+  artifactName: echonote_${version}_amd64.deb
+  packageName: echonote
+  packageCategory: utils
+  priority: optional
   fpm:
     - resources/linux/dev.echonote.app.metainfo.xml=/usr/share/metainfo/dev.echonote.app.metainfo.xml
 appImage:

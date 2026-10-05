@@ -12,6 +12,24 @@
 # If cmake is not installed, set CMAKE="uvx --from cmake cmake".
 set -euo pipefail
 
+# --container: build inside Ubuntu 22.04 (glibc 2.35) with Docker/Podman so the binaries run on
+# Ubuntu 22.04+, Debian 12+ and current Fedora. Release builds should always use this; a native
+# build only runs on systems with a glibc at least as new as the build machine's.
+if [ "${1:-}" = "--container" ]; then
+  ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+  ENGINE="${CONTAINER_ENGINE:-$(command -v docker || command -v podman)}"
+  # label=disable: let the container read the checkout on SELinux hosts (Fedora) without relabeling it.
+  exec "$ENGINE" run --rm --security-opt label=disable -v "$ROOT:/src" -w /src \
+    -e WHISPER_TAG -e LLAMA_TAG -e HOST_UID="$(id -u)" -e HOST_GID="$(id -g)" \
+    ubuntu:22.04 bash -c '
+      set -e
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update -qq && apt-get install -y -qq build-essential git ca-certificates python3-pip >/dev/null
+      pip3 install -q "cmake>=3.28"
+      PORTABLE_STATIC=1 NATIVE_BUILD_DIR=/tmp/native bash scripts/build-native-runtime.sh
+      chown -R "$HOST_UID:$HOST_GID" resources/bin'
+fi
+
 WHISPER_TAG="${WHISPER_TAG:-v1.9.4}"
 LLAMA_TAG="${LLAMA_TAG:-b11379}"
 CMAKE="${CMAKE:-cmake}"
@@ -20,12 +38,19 @@ WORK="${NATIVE_BUILD_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/echonote-native-build}
 OUT="$ROOT/resources/bin/linux-x64"
 JOBS="$(nproc)"
 
+if [ "${PORTABLE_STATIC:-0}" = "1" ]; then
+  # Inside the container: link libstdc++/libgcc statically, so only glibc (>= 2.35) is needed.
+  LINK_FLAGS=("-DCMAKE_EXE_LINKER_FLAGS=-static-libgcc -static-libstdc++")
+else
+  LINK_FLAGS=('-DCMAKE_BUILD_RPATH=$ORIGIN' -DCMAKE_BUILD_RPATH_USE_ORIGIN=ON)
+fi
+
 COMMON_FLAGS=(
+  "${LINK_FLAGS[@]}"
   -DCMAKE_BUILD_TYPE=Release
   -DBUILD_SHARED_LIBS=OFF
   -DGGML_NATIVE=OFF -DGGML_AVX=ON -DGGML_AVX2=ON -DGGML_FMA=ON -DGGML_F16C=ON -DGGML_BMI2=ON
   -DGGML_OPENMP=OFF
-  '-DCMAKE_BUILD_RPATH=$ORIGIN' -DCMAKE_BUILD_RPATH_USE_ORIGIN=ON
 )
 
 mkdir -p "$WORK" "$OUT"
@@ -56,14 +81,15 @@ $CMAKE --build "$WORK/llama.cpp/build" --target llama-server -j "$JOBS"
 install -m 755 "$WORK/llama.cpp/build/bin/llama-server" "$OUT/llama-server"
 
 strip "$OUT/whisper-server" "$OUT/llama-server" || true
-for lib in libstdc++.so.6 libgcc_s.so.1; do
+rm -f "$OUT/libstdc++.so.6" "$OUT/libgcc_s.so.1"
+[ "${PORTABLE_STATIC:-0}" = "1" ] || for lib in libstdc++.so.6 libgcc_s.so.1; do
   src="$(ldd "$OUT/llama-server" | awk -v l="$lib" '$1==l {print $3}')"
   [ -n "$src" ] && install -m 644 "$(readlink -f "$src")" "$OUT/$lib"
 done
 cat > "$OUT/VERSIONS.txt" <<VERS
 whisper.cpp $WHISPER_TAG (MIT License)
 llama.cpp $LLAMA_TAG (MIT License)
-built $(date -u +%Y-%m-%dT%H:%M:%SZ) on $(uname -srm)
+built $(date -u +%Y-%m-%dT%H:%M:%SZ) on $(. /etc/os-release; echo "$PRETTY_NAME") $(uname -m), glibc $(ldd --version | head -1 | grep -o "[0-9.]*$")
 VERS
 echo "==> Done. Dynamic dependencies:"
 ldd "$OUT/whisper-server" "$OUT/llama-server" || true

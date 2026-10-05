@@ -30,14 +30,20 @@ Download from the [latest release](https://github.com/KrAG2000/echonote/releases
 and in GNOME Software under *Installed*, and can be uninstalled from there.
 
 ```bash
-sudo dnf install ./echonote-1.0.3.x86_64.rpm
+sudo dnf install ./echonote-1.0.4.x86_64.rpm
+```
+
+**Debian / Ubuntu: DEB package.** Same as the RPM: app menu, GNOME Software / App Center, normal uninstall.
+
+```bash
+sudo apt install ./echonote_1.0.4_amd64.deb
 ```
 
 **Any other distribution: AppImage.** A single portable file; nothing is installed.
 
 ```bash
-chmod +x EchoNote-1.0.3-x86_64.AppImage
-./EchoNote-1.0.3-x86_64.AppImage
+chmod +x EchoNote-1.0.4-x86_64.AppImage
+./EchoNote-1.0.4-x86_64.AppImage
 ```
 (Needs FUSE, which Fedora ships. Elsewhere install `fuse`/`libfuse2`, or run with `--appimage-extract-and-run`.)
 
@@ -52,7 +58,9 @@ The inference runtimes (`whisper-server`, `llama-server`) are inside the package
 
 **Requirements:** x86-64 CPU with AVX2 (Intel Haswell / AMD Zen or newer), ~4.5 GB free RAM for the
 default models (smaller models are available in Settings for low-memory machines), ~3 GB disk for models.
-Tested on Fedora 44, GNOME 50 (Wayland). Other distributions/desktops are untested.
+The bundled AI runtimes need glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+). Tested on
+Fedora 44 / GNOME 50 (Wayland). The `.deb` and its bundled runtimes were also verified in an Ubuntu 24.04
+container; the desktop experience on Ubuntu itself is untested.
 
 ## Uninstall
 
@@ -61,7 +69,8 @@ Tested on Fedora 44, GNOME 50 (Wayland). Other distributions/desktops are untest
    shortcut and the launch-at-login entry.
 2. Quit EchoNote: **Settings → Quit EchoNote completely** (closing the window keeps it running in the background).
 3. Remove the app:
-   * **RPM:** GNOME Software → *Installed* → EchoNote → **Uninstall**, or `sudo dnf remove echonote`.
+   * **RPM / DEB:** GNOME Software (or App Center) → *Installed* → EchoNote → **Uninstall**, or
+     `sudo dnf remove echonote` / `sudo apt remove echonote`.
    * **AppImage:** delete the `.AppImage` file (and any menu entry you created for it).
 
 If you skipped step 1, your data stays in `~/.config/EchoNote` (delete that folder to remove it), and the
@@ -173,15 +182,16 @@ appearance of the desktop notification — check these manually (see below).
 
 ## Build from source
 
-Requires Node.js 24 (`.nvmrc`), git, g++, cmake (or `CMAKE="uvx --from cmake cmake"`). Building the RPM
-also needs `rpmbuild` and `libxcrypt-compat` (electron-builder's bundled fpm links against `libcrypt.so.1`).
+Requires Node.js 24 (`.nvmrc`), git, g++, cmake (or `CMAKE="uvx --from cmake cmake"`). Packaging needs `rpmbuild` and `dpkg-deb`; electron-builder's bundled fpm also needs `libcrypt.so.1`
+(`libxcrypt-compat` on Fedora; the bundler extracts it automatically if it isn't installed).
 
 ```bash
 npm ci
-npm run native:build        # builds whisper-server + llama-server into resources/bin/linux-x64
+npm run native:build -- --container   # portable whisper-server + llama-server (Ubuntu 22.04 / glibc 2.35, needs Docker or Podman)
 npm run models:prepare      # optional: pre-download default models to ~/.config/EchoNote/models
 npm run dev                 # run in development
-npm run package:linux       # -> dist/EchoNote-<version>-x86_64.AppImage and dist/echonote-<version>.x86_64.rpm
+npm run dist:linux          # checks, tests, builds AppImage + .rpm + .deb, inspects them, writes dist/SHA256SUMS
+npm run dist:linux -- --release   # ... and publishes GitHub release v<version> (notes: docs/release-notes/v<version>.md)
 ```
 
 ## Limitations

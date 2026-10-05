@@ -134,7 +134,21 @@ Unconfirmed reminders are **not** scheduled until the user confirms (or edits) t
 
 ## Packaging
 
-`electron-builder` produces an AppImage. Native runtimes are built by
-`scripts/build-native-runtime.sh` (pinned tags, static ggml, AVX2 baseline, `$ORIGIN` rpath) and
-copied into `resources/bin/linux-x64`. Models are not bundled (2.7 GB); the first-run setup downloads
-and verifies them.
+`npm run dist:linux` (`scripts/package-linux.sh`) is the single entry point. It:
+
+1. refuses native runtimes that need a glibc newer than 2.35 (override: `--allow-host-glibc`);
+2. runs lint and unit tests;
+3. builds the app and runs electron-builder for **AppImage**, **rpm** and **deb**;
+4. inspects each package for the runtimes, model manifest, tray icons, desktop entry and AppStream
+   metadata;
+5. writes `dist/SHA256SUMS`;
+6. optionally installs the `.deb` in clean Ubuntu 24.04 and 22.04 containers and runs the bundled
+   whisper-server/llama-server against the real models (`--verify-deb`);
+7. optionally publishes the GitHub release (`--release`).
+
+The native runtimes come from `scripts/build-native-runtime.sh --container`, which compiles pinned
+whisper.cpp and llama.cpp inside Ubuntu 22.04 with static libstdc++/libgcc and an AVX2 baseline. The
+binaries therefore need only glibc ≥ 2.34 (Ubuntu 22.04+, Debian 12+, Fedora 36+). The RPM and DEB install
+to `/opt/EchoNote` with `/usr/bin/echonote`, an app-menu entry, the icon and
+`/usr/share/metainfo/dev.echonote.app.metainfo.xml`, so GNOME Software / App Center list the app and can
+uninstall it. Models are not bundled (2.7 GB); the first-run setup downloads and verifies them.
