@@ -76,7 +76,10 @@ def app_icon() -> None:
     final.resize((512, 512), Image.LANCZOS).save(os.path.join(OUT, 'icon.png'))
 
 
-app_icon()
+# Only regenerate the app icon from echonote.png if that source exists; otherwise keep the
+# hand-made resources/icon.png and resources/branding/echonote-1024.png as they are.
+if os.path.exists(os.path.join(OUT, '..', 'echonote.png')):
+    app_icon()
 def indicator(size: int, kind: str) -> Image.Image:
     """Top-bar indicators: a plain red dot while recording, a green check right after."""
     s = size * 4
